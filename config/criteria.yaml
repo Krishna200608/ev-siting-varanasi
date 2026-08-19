@@ -1,62 +1,121 @@
-# Placeholder configuration for MCDM Criteria Matrix (Pipeline A)
-# Based on the criteria structure validated by Rashmitha et al. (2024).
-# To be populated in Milestone 2 & Milestone 3.
+# Configuration for MCDM Decision Matrix Construction (Pipeline A)
+# Based on the criteria structure from Rashmitha et al. (2024).
 
-version: "1.0.0"
+version: "1.1.0"
 project: "EV Charging Station Siting - Varanasi"
+
+# Execution Mode & Bounding Parameters
+execution:
+  mode: "sample"  # "sample" (low API cost, small landmark box) | "full" (full Varanasi city boundary)
+  fishnet_spacing_m: 500  # Regular fishnet grid spacing in meters
+  raster_resolution_m: 50  # Spatial resolution for KDE and distance raster grids (meters)
+  kde_bandwidth_m: 400  # Kernel density estimation bandwidth (meters)
+  
+  # Sample extent: ~2.5 km x 2.7 km box over Central Varanasi (Godowlia / Dashashwamedh / Cantonment corridor)
+  sample_bbox:
+    min_lat: 25.3000
+    min_lon: 82.9900
+    max_lat: 25.3250
+    max_lon: 83.0150
+
+  # Full extent query for OpenStreetMap Nominatim/Overpass
+  full_query: "Varanasi, Uttar Pradesh, India"
 
 # Candidate Site Generation Parameters
 candidate_generation:
-  buffer_radius_meters: 300  # Default 300m buffer around power substations (subject to confirmation)
-  min_distance_between_sites_meters: 500
+  method: "fishnet_grid"  # Regular spatial grid points across urban extent
+  spacing_meters: 500
+  projection_epsg: 32644  # UTM Zone 44N (Metric coordinate system for Varanasi)
 
-# MCDM Criteria Definitions
+# MCDM Criteria Definitions & Implementation Status
 criteria:
-  - id: C1
+  - id: C1_Major_Roads
     name: "Road Proximity / Major Roads Density"
     type: "benefit"
     category: "Traffic / Accessibility"
-    source: "OpenStreetMap"
-    weight_placeholder: null
+    source: "OpenStreetMap (Overpass API)"
+    status: "confirmed"
 
-  - id: C2
+  - id: C2_Population
     name: "Population Density"
     type: "benefit"
     category: "Demographics"
     source: "Census of India (Extrapolated IDW)"
-    weight_placeholder: null
+    status: "pending_verification"  # Clean programmatic API unavailable; manual steps documented
 
-  - id: C3
+  - id: C3_Land_Use
     name: "Commercial / Land Use Suitability"
     type: "benefit"
     category: "Urban Zoning"
     source: "Bhuvan / Esri Land Cover"
-    weight_placeholder: null
+    status: "pending_verification"  # Clean programmatic API unavailable; manual steps documented
 
-  - id: C4
+  - id: C4_Grid_Proximity
     name: "Distance / Proximity to Grid Substation"
     type: "cost"
     category: "Electrical Infrastructure"
     source: "UPPCL / OSM Power Tags"
-    weight_placeholder: null
+    status: "pending"  # Sourcing unconfirmed; kept as stub
 
-  - id: C5
+  - id: C5_Competitor_EVCS
     name: "Competitor Charging Station Proximity"
     type: "cost"
     category: "Market Competition"
-    source: "OpenChargeMap"
-    weight_placeholder: null
+    source: "OpenChargeMap API"
+    status: "confirmed"
 
-  - id: C6
-    name: "Point of Interest (POI) Density"
+  - id: C6_POI_Schools
+    name: "Schools / Education POI Density"
     type: "benefit"
     category: "Footfall Proxy"
-    source: "OpenStreetMap POIs"
-    weight_placeholder: null
+    source: "Google Places API (Nearby Search: school)"
+    status: "confirmed"
 
-  - id: C7
+  - id: C6_POI_Shopping_Malls
+    name: "Shopping Malls / Commercial POI Density"
+    type: "benefit"
+    category: "Footfall Proxy"
+    source: "Google Places API (Nearby Search: shopping_mall)"
+    status: "confirmed"
+
+  - id: C6_POI_Restaurants
+    name: "Restaurants / Food POI Density"
+    type: "benefit"
+    category: "Footfall Proxy"
+    source: "Google Places API (Nearby Search: restaurant)"
+    status: "confirmed"
+
+  - id: C6_POI_Hospitals
+    name: "Hospitals / Healthcare POI Density"
+    type: "benefit"
+    category: "Footfall Proxy"
+    source: "Google Places API (Nearby Search: hospital)"
+    status: "confirmed"
+
+  - id: C6_POI_Theatres
+    name: "Theatres / Entertainment POI Density"
+    type: "benefit"
+    category: "Footfall Proxy"
+    source: "Google Places API (Nearby Search: movie_theater)"
+    status: "confirmed"
+
+  - id: C6_POI_Bus_Stops
+    name: "Transit / Bus Stops POI Density"
+    type: "benefit"
+    category: "Footfall Proxy"
+    source: "Google Places API (Nearby Search: transit_station)"
+    status: "confirmed"
+
+  - id: C6_POI_Petrol_Bunks
+    name: "Petrol Bunks / Fuel Retail POI Density"
+    type: "benefit"
+    category: "Footfall Proxy / Co-location Opportunity"
+    source: "Google Places API (Nearby Search: gas_station)"
+    status: "confirmed"
+
+  - id: C7_Land_Cost
     name: "Indicative Land / Commercial Rental Cost"
     type: "cost"
     category: "Economic Feasibility"
     source: "Real Estate Portals (Proxy)"
-    weight_placeholder: null
+    status: "pending"  # Sourcing unconfirmed; kept as stub

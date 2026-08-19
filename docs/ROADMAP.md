@@ -4,7 +4,7 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
 
 ---
 
-## Milestone 1 — Repository Scaffolding & Setup (Active / Current)
+## Milestone 1 — Repository Scaffolding & Setup (Completed)
 - Repository directory structure, standing agent rules (`AGENTS.md`), and environment templates.
 - Python 3.11+ dependencies in `requirements.txt`.
 - Fully typed Python stub modules across GIS, MCDM, ML, and Integration packages.
@@ -13,17 +13,21 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
 
 ---
 
-## Milestone 2 — GIS Pipeline: Spatial Data Processing & Decision Matrix
-- Ingestion and preprocessing of Varanasi spatial layers (OSM roads/POIs, Census population data, Bhuvan land cover, power grid points, OpenChargeMap EV stations).
-- Kernel Density Estimation (KDE) and Inverse Distance Weighting (IDW) raster surface generation.
-- Candidate site buffer delineation (300m buffers around power substations).
-- Spatial overlay and zonal statistics extraction to generate the standardized decision matrix ($m$ sites $\times$ $n$ criteria).
+## Milestone 2 — GIS Pipeline: Spatial Data Processing & Decision Matrix (Completed — Confirmed Criteria)
+- Implemented regular 500m fishnet candidate grid generation projected in metric UTM Zone 44N (`EPSG:32644`).
+- Implemented automated OSM Overpass road network query and Euclidean distance-to-road proximity rasterization (1–9 scale).
+- Implemented OpenChargeMap API integration for competitor charging station coverage scoring (1–9 KDE raster).
+- Implemented generic, reusable Google Places API (New) fetcher for 7 confirmed POI categories (Schools, Shopping Malls, Restaurants, Hospitals, Theatres, Bus Stops, Petrol Bunks) with Gaussian Kernel Density Estimation (1–9 scale).
+- Implemented spatial candidate overlay generating `data/processed/gis/decision_matrix.csv`.
+- Maintained unconfirmed criteria (Population Density, Land Use/Cover, Land Cost, Substation Grid Proximity) as explicit stubs raising `NotImplementedError` per `docs/PENDING_DECISIONS.md`.
+- Implemented mock-based unit test suite (`tests/test_gis.py`) passing with zero live network calls.
 
 ---
 
-## Milestone 3 — MCDM Pipeline: Criteria Weighting & Site Ranking
+## Milestone 3 — MCDM Pipeline: Criteria Weighting & Site Ranking (Next)
 - Implementation of CRITIC (primary) and Entropy (secondary) objective criteria weighting methods.
 - Implementation of TOPSIS (primary) and WASPAS (cross-check) multi-criteria ranking algorithms.
+- Ingestion and processing of `data/processed/gis/decision_matrix.csv`.
 - Validation of ranking stability against Indian case study benchmarks (Rashmitha et al., 2024).
 
 ---

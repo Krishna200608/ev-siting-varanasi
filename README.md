@@ -10,12 +10,13 @@ The project combines two independent methodological pipelines that merge in the 
 
 ```
 [ Pipeline A: Spatial GIS & MCDM ]                 [ Pipeline B: ML Demand Forecasting ]
-1. Raw GIS Layers (OSM, Bhuvan, Census)            1. Public EV Charging Dataset (Hourly)
-2. Raster Surfaces (KDE & IDW)                     2. Feature Cleaning & Encoding
-3. Candidate Buffers (300m at Substations)         3. XGBoost Training (5-fold CV)
-4. Decision Matrix Generation                      4. SHAP Feature Attribution
-5. CRITIC / Entropy Weighting                      5. Relative Demand Inference
-6. TOPSIS / WASPAS Site Ranking                    
+1. Candidate Fishnet Grid (500m UTM 44N)           1. Public EV Charging Dataset (Hourly)
+2. Road Network Proximity (OSM Overpass)           2. Feature Cleaning & Encoding
+3. Competitor EV Density (OpenChargeMap)           3. XGBoost Training (5-fold CV)
+4. POI Density Surfaces (Google Places New API)    4. SHAP Feature Attribution
+5. Candidate Overlay -> Decision Matrix            5. Relative Demand Inference
+6. CRITIC / Entropy Weighting (Milestone 3)
+7. TOPSIS / WASPAS Site Ranking (Milestone 3)
                        │                                         │
                        └───────────────────┬─────────────────────┘
                                            ▼
@@ -32,12 +33,12 @@ The project combines two independent methodological pipelines that merge in the 
 
 | Directory / File | Synopsis Stage / Pipeline | Purpose & Theoretical Basis |
 |---|---|---|
-| `config/criteria.yaml` | Configuration | Defines MCDM criteria, categories, optimization directions, and parameters. |
+| `config/criteria.yaml` | Configuration | Defines MCDM criteria, execution mode (`sample` vs `full`), and parameters. |
 | `data/raw/gis/` | Pipeline A: Data Ingestion | Raw spatial data: OSM shapefiles/GeoJSON, Census population, Bhuvan land cover. |
 | `data/raw/demand/` | Pipeline B: Data Ingestion | External public hourly EV charging session dataset (e.g., California / Kaggle). |
-| `data/processed/gis/` | Pipeline A: GIS Preprocessing | Standardized raster surfaces and generated decision matrix (`decision_matrix.csv`). |
+| `data/processed/gis/` | Pipeline A: GIS Preprocessing | Generated decision matrix (`decision_matrix.csv`). |
 | `data/processed/demand/` | Pipeline B: ML Preprocessing | Cleaned feature matrices and target demand vectors. |
-| `src/gis/` | Pipeline A: Stage 1 | GIS layer loading, KDE/IDW rasterization, buffer generation, zonal stats extraction. *(Rashmitha et al., 2024)* |
+| `src/gis/` | Pipeline A: Stage 1 | GIS candidate grid generation, KDE/distance rasterization, spatial overlay. *(Rashmitha et al., 2024)* |
 | `src/mcdm/` | Pipeline A: Stage 2 | Objective weighting (CRITIC / Entropy) and multi-criteria ranking (TOPSIS / WASPAS). *(Rashmitha et al., 2024; Guo & Zhao, 2015)* |
 | `src/ml/` | Pipeline B: Stage 3 | XGBoost regression training, cross-validation, and SHAP explainability. *(Zhang et al., 2025)* |
 | `src/integration/` | Stage 4: Synthesis | Composite feasibility scoring and 12-scenario weight-perturbation sensitivity testing. |
@@ -56,7 +57,7 @@ The project combines two independent methodological pipelines that merge in the 
 - **Python:** 3.11 or higher recommended.
 - **Package Manager:** `pip` (or `conda` / `mamba` for precompiled GIS binaries).
 
-### Option A: Standard Setup via `pip`
+### Setup via `pip`
 ```bash
 # 1. Navigate to the project root
 cd ev-siting-varanasi
@@ -73,34 +74,44 @@ pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### Option B: Conda / Mamba Setup (Recommended for Windows GDAL/Rasterio)
-`geopandas` and `rasterio` depend on underlying C/C++ GDAL, GEOS, and PROJ binaries. On Windows, if `pip install` encounters binary compilation errors, use Conda/Mamba:
-```bash
-conda create -n ev-siting python=3.11
-conda activate ev-siting
-conda install -c conda-forge geopandas rasterio shapely xgboost shap scikit-learn pandas pyyaml matplotlib jupyter pytest
-```
-
-### Configuration
-Copy the environment template and configure optional API keys if needed:
+### Configuration & API Keys
+Copy the environment template and populate your API keys in `.env`:
 ```bash
 cp .env.example .env
 ```
+Key requirements:
+- `GOOGLE_PLACES_API_KEY`: Required for fetching POI layers via Google Places API (New).
+- `OPENCHARGEMAP_API_KEY`: Required for fetching existing EV charging stations via OpenChargeMap.
 
 ---
 
-## 4. Running Tests
+## 4. Running the GIS Pipeline (Milestone 2)
 
-To verify the test harness:
+### Execution Modes (`sample` vs. `full`)
+In `config/criteria.yaml`, you can configure the `mode` parameter:
+- **`mode: "sample"` (Default):** Restricts the spatial fishnet grid to a small bounding box (~2.5 km $\times$ 2.7 km) covering central Varanasi (Godowlia / Dashashwamedh / Cantonment). This minimizes Google Places API quota usage while generating an authentic decision matrix for testing.
+- **`mode: "full"`:** Queries OpenStreetMap Nominatim for the entire municipal extent of Varanasi and generates a city-wide fishnet grid.
+
+### Execute Decision Matrix Generation
+```bash
+python src/gis/build_decision_matrix.py
+```
+Output:
+The processed decision matrix is saved to `data/processed/gis/decision_matrix.csv`.
+
+---
+
+## 5. Running Tests
+
+To run the complete test suite (with zero live network calls):
 ```bash
 pytest tests/ -v
 ```
-*(Note: In Milestone 1, unit tests are cleanly marked as skipped until logic is implemented in Milestones 3 and 4.)*
 
 ---
 
-## 5. Documentation & Key Links
+## 6. Documentation & Key Links
 
-- **Implementation Roadmap:** See [docs/ROADMAP.md](docs/ROADMAP.md) for milestone schedules.
-- **Data Sourcing & Pending Decisions:** Consult [docs/PENDING_DECISIONS.md](docs/PENDING_DECISIONS.md) before referencing data sources.
+- **Implementation Roadmap:** See [docs/ROADMAP.md](docs/ROADMAP.md) for milestone status.
+- **Data Sourcing & Pending Decisions:** Consult [docs/PENDING_DECISIONS.md](docs/PENDING_DECISIONS.md) for authoritative data source statuses and architectural decisions.
 - **Standing Agent Rules:** Review [AGENTS.md](AGENTS.md) for coding conventions and policies.

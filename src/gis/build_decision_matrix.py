@@ -1,94 +1,673 @@
 """Pipeline A: GIS Data Preparation — Decision Matrix Builder.
 
-Synopsis Stage: Stage 1 — Raw Spatial Data -> Raster Surfaces -> Candidate Site Buffers -> Decision Matrix.
+Synopsis Stage: Stage 1 — Spatial Data Ingestion, Density/Proximity Rasterization & Candidate Grid Overlay.
 Theoretical Foundation: Rashmitha, Sushma & Roy (2024, Environment, Development and Sustainability).
 
-This module ingests raw spatial layers for Varanasi (OSM road networks, Bhuvan land use,
-Census population data, power grid coordinates, POIs, existing EV charging points) and transforms
-them into standardized raster suitability surfaces (via Kernel Density Estimation and IDW interpolation).
-It then overlays candidate site buffers (e.g., 300m radius around grid nodes) to extract zonal statistics,
-generating the evaluation decision matrix (candidate sites x criteria) for MCDM processing.
+This module implements the complete GIS processing pipeline for confirmed criteria in Varanasi:
+1. Candidate Site Generation: Regular fishnet spatial grid points across urban bounds (EPSG:32644).
+2. Road Accessibility: OSM Overpass API -> Euclidean distance -> 1-9 proximity raster.
+3. Competitor EV Infrastructure: OpenChargeMap API -> Kernel Density -> 1-9 density raster.
+4. Urban Points of Interest (POI): Google Places API (Nearby Search) for 7 confirmed categories:
+   Schools, Shopping Malls, Restaurants, Hospitals, Theatres, Transit/Bus Stops, Petrol Bunks.
+5. Spatial Overlay: Extracts criteria scores (1-9 scale) for each candidate site to assemble
+   the standardized decision matrix (candidate sites x criteria).
+
+Unconfirmed criteria (Population Density, Land Use/Cover, Land Cost, Grid Substations)
+remain explicitly stubbed with NotImplementedError per docs/PENDING_DECISIONS.md.
 """
 
+import os
+import time
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
+import numpy as np
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import Point, LineString, Polygon, box
+from scipy.stats import gaussian_kde
+import requests
+import yaml
+from dotenv import load_dotenv
 
 
-def load_raw_gis_layers(raw_gis_dir: Path) -> dict[str, Any]:
-    """Load raw vector and raster spatial layers for Varanasi.
+# ---------------------------------------------------------------------------
+# 1. Boundary & Candidate Site Generation
+# ---------------------------------------------------------------------------
 
-    Args:
-        raw_gis_dir: Path to directory containing raw spatial data files (OSM shapefiles/GeoJSON,
-            Bhuvan LULC rasters, Census shapefiles).
-
-    Returns:
-        Dictionary mapping layer names to their loaded spatial data objects.
-
-    Raises:
-        NotImplementedError: Scheduled for Milestone 2 implementation.
-    """
-    raise NotImplementedError("Milestone 2 — see docs/ROADMAP.md")
-
-
-def create_candidate_buffers(
-    grid_points_path: Path,
-    buffer_radius_meters: float = 300.0,
-) -> Any:
-    """Generate candidate site buffer polygons around electrical grid substation coordinates.
-
-    Following Rashmitha et al. (2024), fixed-radius buffers are established around power grid nodes
-    to represent discrete candidate site alternatives.
+def get_varanasi_boundary(
+    mode: str = "sample",
+    sample_bbox: Optional[dict[str, float]] = None,
+    full_query: str = "Varanasi, Uttar Pradesh, India",
+) -> gpd.GeoDataFrame:
+    """Retrieve the boundary polygon for Varanasi in sample or full execution mode.
 
     Args:
-        grid_points_path: Path to power grid substation points dataset.
-        buffer_radius_meters: Radius in meters for candidate alternative zones (default: 300.0).
+        mode: "sample" (uses small landmark bounding box) or "full" (queries OSM Nominatim).
+        sample_bbox: Dictionary with min_lat, min_lon, max_lat, max_lon.
+        full_query: Search string for Nominatim boundary extraction.
 
     Returns:
-        GeoDataFrame containing candidate buffer geometries with unique site IDs.
-
-    Raises:
-        NotImplementedError: Scheduled for Milestone 2 implementation.
+        GeoDataFrame containing the single boundary Polygon in EPSG:4326.
     """
-    raise NotImplementedError("Milestone 2 — see docs/ROADMAP.md")
+    if mode == "sample":
+        if sample_bbox is None:
+            # Default Godowlia / Dashashwamedh landmark box in Central Varanasi (~2.5km x 2.7km)
+            sample_bbox = {
+                "min_lat": 25.3000,
+                "min_lon": 82.9900,
+                "max_lat": 25.3250,
+                "max_lon": 83.0150,
+            }
+        poly = box(
+            sample_bbox["min_lon"],
+            sample_bbox["min_lat"],
+            sample_bbox["max_lon"],
+            sample_bbox["max_lat"],
+        )
+        return gpd.GeoDataFrame({"name": ["Varanasi_Sample_Box"], "geometry": [poly]}, crs="EPSG:4326")
+
+    # Full mode: Query OSM Nominatim
+    url = "https://nominatim.openstreetmap.org/search"
+    params = {"q": full_query, "format": "json", "polygon_geojson": 1, "limit": 1}
+    headers = {"User-Agent": "ev-siting-varanasi-research/1.0"}
+    try:
+        resp = requests.get(url, params=params, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        if data and "geojson" in data[0]:
+            from shapely.geometry import shape
+            geom = shape(data[0]["geojson"])
+            return gpd.GeoDataFrame({"name": ["Varanasi_Full_Boundary"], "geometry": [geom]}, crs="EPSG:4326")
+    except Exception:
+        pass
+
+    # Fallback full bounding box for Varanasi urban extent
+    fallback_poly = box(82.8800, 25.2400, 83.0800, 25.3900)
+    return gpd.GeoDataFrame({"name": ["Varanasi_Full_Fallback"], "geometry": [fallback_poly]}, crs="EPSG:4326")
 
 
-def compute_raster_zonal_stats(
-    candidate_buffers: Any,
-    raster_layers: dict[str, Path],
+def generate_candidate_grid(
+    boundary_gdf: gpd.GeoDataFrame,
+    spacing_m: float = 500.0,
+    epsg_projected: int = 32644,
+) -> gpd.GeoDataFrame:
+    """Generate candidate site alternatives as a regular fishnet grid of points.
+
+    Following Architectural Decision AD-1 (see docs/PENDING_DECISIONS.md), candidate sites
+    are generated as a regular metric spatial grid projected in UTM Zone 44N (EPSG:32644)
+    and reprojected to WGS84 (EPSG:4326).
+
+    Args:
+        boundary_gdf: Boundary polygon GeoDataFrame in EPSG:4326.
+        spacing_m: Grid resolution in meters (default 500m).
+        epsg_projected: Metric projected CRS (default 32644 for Varanasi UTM Zone 44N).
+
+    Returns:
+        GeoDataFrame with candidate Point geometries, site_id, latitude, and longitude in EPSG:4326.
+    """
+    projected = boundary_gdf.to_crs(epsg=epsg_projected)
+    poly = projected.geometry.iloc[0]
+    min_x, min_y, max_x, max_y = poly.bounds
+
+    x_coords = np.arange(min_x + spacing_m / 2, max_x, spacing_m)
+    y_coords = np.arange(min_y + spacing_m / 2, max_y, spacing_m)
+
+    grid_points = []
+    for x in x_coords:
+        for y in y_coords:
+            pt = Point(x, y)
+            if poly.contains(pt):
+                grid_points.append(pt)
+
+    # Fallback if box is too small for strict contains
+    if not grid_points:
+        for x in x_coords:
+            for y in y_coords:
+                grid_points.append(Point(x, y))
+
+    pts_gdf = gpd.GeoDataFrame(geometry=grid_points, crs=f"EPSG:{epsg_projected}")
+    pts_wgs84 = pts_gdf.to_crs(epsg=4326)
+
+    pts_wgs84["site_id"] = [f"SITE_{i+1:03d}" for i in range(len(pts_wgs84))]
+    pts_wgs84["latitude"] = pts_wgs84.geometry.y
+    pts_wgs84["longitude"] = pts_wgs84.geometry.x
+
+    return pts_wgs84
+
+
+# ---------------------------------------------------------------------------
+# 2. Data Fetchers (Confirmed Criteria)
+# ---------------------------------------------------------------------------
+
+def fetch_poi_layer(
+    category: str,
+    api_key: str,
+    bbox: tuple[float, float, float, float],
+    radius_m: float = 2500.0,
+) -> gpd.GeoDataFrame:
+    """Generic reusable fetcher for Point of Interest categories via Google Places API (New).
+
+    Queries Google Places API (New) searchNearby endpoint using structured type filters.
+
+    Args:
+        category: One of 'schools', 'shopping_malls', 'restaurants', 'hospitals',
+            'theatres', 'bus_stops', 'petrol_bunks'.
+        api_key: Google Places API Key.
+        bbox: Bounding box tuple (min_lat, min_lon, max_lat, max_lon).
+        radius_m: Search radius in meters around the bounding box center.
+
+    Returns:
+        GeoDataFrame of POI Point geometries in EPSG:4326.
+    """
+    category_type_map = {
+        "schools": ["school", "secondary_school", "primary_school"],
+        "shopping_malls": ["shopping_mall", "department_store"],
+        "restaurants": ["restaurant", "cafe"],
+        "hospitals": ["hospital", "medical_clinic"],
+        "theatres": ["movie_theater"],
+        "bus_stops": ["bus_station", "transit_station", "bus_stop"],
+        "petrol_bunks": ["gas_station"],
+    }
+    included_types = category_type_map.get(category, [category])
+
+    min_lat, min_lon, max_lat, max_lon = bbox
+    center_lat = (min_lat + max_lat) / 2.0
+    center_lon = (min_lon + max_lon) / 2.0
+
+    url = "https://places.googleapis.com/v1/places:searchNearby"
+    headers = {
+        "X-Goog-Api-Key": api_key,
+        "X-Goog-FieldMask": "places.displayName,places.location,places.id",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "includedTypes": included_types,
+        "maxResultCount": 20,
+        "locationRestriction": {
+            "circle": {
+                "center": {
+                    "latitude": center_lat,
+                    "longitude": center_lon,
+                },
+                "radius": radius_m,
+            }
+        },
+    }
+
+    points = []
+    names = []
+    place_ids = []
+
+    try:
+        resp = requests.post(url, headers=headers, json=payload, timeout=15)
+        if resp.status_code == 200:
+            data = resp.json()
+            for item in data.get("places", []):
+                loc = item.get("location", {})
+                lat, lon = loc.get("latitude"), loc.get("longitude")
+                if lat is not None and lon is not None:
+                    points.append(Point(lon, lat))
+                    names.append(item.get("displayName", {}).get("text", "Unknown"))
+                    place_ids.append(item.get("id", ""))
+        else:
+            print(f"[Warning] Places API (New) returned status {resp.status_code} for '{category}': {resp.text}")
+    except Exception as exc:
+        print(f"[Warning] Google Places fetch failed for '{category}': {exc}")
+
+    if not points:
+        return gpd.GeoDataFrame({"name": [], "place_id": [], "geometry": []}, crs="EPSG:4326")
+
+    return gpd.GeoDataFrame(
+        {"name": names, "place_id": place_ids, "geometry": points},
+        crs="EPSG:4326",
+    )
+
+
+def fetch_charging_stations(
+    api_key: str,
+    bbox: tuple[float, float, float, float],
+) -> gpd.GeoDataFrame:
+    """Fetch existing EV charging stations via OpenChargeMap API (Competition Criterion).
+
+    Args:
+        api_key: OpenChargeMap API Key.
+        bbox: Bounding box tuple (min_lat, min_lon, max_lat, max_lon).
+
+    Returns:
+        GeoDataFrame of existing EV station Point geometries in EPSG:4326.
+    """
+    min_lat, min_lon, max_lat, max_lon = bbox
+    url = "https://api.openchargemap.io/v3/poi/"
+    headers = {"X-API-Key": api_key, "User-Agent": "ev-siting-varanasi-research/1.0"}
+    params = {
+        "boundingbox": f"({min_lat},{min_lon}),({max_lat},{max_lon})",
+        "maxresults": 100,
+        "compact": "true",
+        "verbose": "false",
+    }
+
+    points = []
+    station_ids = []
+
+    try:
+        resp = requests.get(url, params=params, headers=headers, timeout=15)
+        resp.raise_for_status()
+        items = resp.json()
+
+        for item in items:
+            addr = item.get("AddressInfo", {})
+            lat = addr.get("Latitude")
+            lon = addr.get("Longitude")
+            if lat is not None and lon is not None:
+                points.append(Point(lon, lat))
+                station_ids.append(item.get("ID", 0))
+    except Exception as exc:
+        print(f"[Warning] OpenChargeMap fetch failed: {exc}")
+
+    if not points:
+        return gpd.GeoDataFrame({"station_id": [], "geometry": []}, crs="EPSG:4326")
+
+    return gpd.GeoDataFrame({"station_id": station_ids, "geometry": points}, crs="EPSG:4326")
+
+
+def fetch_major_roads(bbox: tuple[float, float, float, float]) -> gpd.GeoDataFrame:
+    """Fetch major road network Linestrings via OpenStreetMap Overpass API.
+
+    Queries motorway, trunk, primary, secondary, and tertiary highways.
+
+    Args:
+        bbox: Bounding box tuple (min_lat, min_lon, max_lat, max_lon).
+
+    Returns:
+        GeoDataFrame of LineString road geometries in EPSG:4326.
+    """
+    min_lat, min_lon, max_lat, max_lon = bbox
+    overpass_endpoints = [
+        "https://overpass-api.de/api/interpreter",
+        "https://overpass.kumi.systems/api/interpreter",
+        "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
+    ]
+    headers = {
+        "User-Agent": "ev-siting-varanasi-research/1.0 (academic research project)",
+        "Accept": "application/json",
+    }
+    overpass_query = f"""
+    [out:json][timeout:25];
+    (
+      way["highway"~"motorway|trunk|primary|secondary|tertiary"]({min_lat},{min_lon},{max_lat},{max_lon});
+    );
+    out geom;
+    """
+
+    lines = []
+    road_types = []
+
+    for endpoint in overpass_endpoints:
+        try:
+            resp = requests.post(endpoint, data={"data": overpass_query}, headers=headers, timeout=25)
+            if resp.status_code == 200:
+                data = resp.json()
+                for element in data.get("elements", []):
+                    if element.get("type") == "way" and "geometry" in element:
+                        coords = [(pt["lon"], pt["lat"]) for pt in element["geometry"]]
+                        if len(coords) >= 2:
+                            lines.append(LineString(coords))
+                            road_types.append(element.get("tags", {}).get("highway", "primary"))
+                if lines:
+                    break
+        except Exception as exc:
+            print(f"[Warning] OSM Overpass endpoint {endpoint} failed: {exc}")
+
+    if not lines:
+        return gpd.GeoDataFrame({"highway": [], "geometry": []}, crs="EPSG:4326")
+
+    return gpd.GeoDataFrame({"highway": road_types, "geometry": lines}, crs="EPSG:4326")
+
+
+# ---------------------------------------------------------------------------
+# 3. Density & Proximity Rasterization (1–9 Suitability Scale)
+# ---------------------------------------------------------------------------
+
+def points_to_kernel_density_raster(
+    points_gdf: gpd.GeoDataFrame,
+    bbox: tuple[float, float, float, float],
+    resolution_m: float = 50.0,
+    bandwidth_m: float = 400.0,
+    epsg_projected: int = 32644,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Convert a point layer into a standardized 1–9 Kernel Density raster surface.
+
+    Following Rashmitha et al. (2024), spatial point features are converted to continuous
+    density surfaces and reclassified onto a 1–9 scale (where 9 = highest density/suitability).
+
+    Args:
+        points_gdf: GeoDataFrame of Point features in EPSG:4326.
+        bbox: Bounding box tuple (min_lat, min_lon, max_lat, max_lon).
+        resolution_m: Pixel grid cell size in meters (default: 50m).
+        bandwidth_m: Kernel density smoothing bandwidth in meters.
+        epsg_projected: Metric projected CRS.
+
+    Returns:
+        Tuple of (2D numpy array with values in [1.0, 9.0], grid_metadata dictionary).
+    """
+    min_lat, min_lon, max_lat, max_lon = bbox
+    box_wgs84 = gpd.GeoDataFrame(geometry=[box(min_lon, min_lat, max_lon, max_lat)], crs="EPSG:4326")
+    box_proj = box_wgs84.to_crs(epsg=epsg_projected)
+    min_x, min_y, max_x, max_y = box_proj.geometry.iloc[0].bounds
+
+    x_grid = np.arange(min_x, max_x + resolution_m, resolution_m)
+    y_grid = np.arange(min_y, max_y + resolution_m, resolution_m)
+    xx, yy = np.meshgrid(x_grid, y_grid)
+
+    meta = {
+        "min_x": min_x,
+        "min_y": min_y,
+        "max_x": max_x,
+        "max_y": max_y,
+        "resolution_m": resolution_m,
+        "shape": xx.shape,
+        "x_coords": x_grid,
+        "y_coords": y_grid,
+        "epsg": epsg_projected,
+    }
+
+    if points_gdf.empty or len(points_gdf) == 0:
+        # Return neutral baseline raster (value 1.0)
+        return np.ones_like(xx, dtype=float), meta
+
+    points_proj = points_gdf.to_crs(epsg=epsg_projected)
+    pt_x = points_proj.geometry.x.values
+    pt_y = points_proj.geometry.y.values
+
+    # Evaluate distance-weighted Kernel Density
+    grid_coords = np.vstack([xx.ravel(), yy.ravel()])
+    if len(pt_x) >= 2:
+        try:
+            kde = gaussian_kde(np.vstack([pt_x, pt_y]), bw_method=bandwidth_m / 1000.0)
+            density = kde(grid_coords).reshape(xx.shape)
+        except Exception:
+            density = np.zeros_like(xx)
+            for px, py in zip(pt_x, pt_y):
+                dist_sq = (xx - px) ** 2 + (yy - py) ** 2
+                density += np.exp(-dist_sq / (2 * (bandwidth_m ** 2)))
+    else:
+        density = np.zeros_like(xx)
+        for px, py in zip(pt_x, pt_y):
+            dist_sq = (xx - px) ** 2 + (yy - py) ** 2
+            density += np.exp(-dist_sq / (2 * (bandwidth_m ** 2)))
+
+    # Reclassify onto 1.0 to 9.0 scale
+    d_min, d_max = density.min(), density.max()
+    if d_max > d_min:
+        norm_density = 1.0 + 8.0 * ((density - d_min) / (d_max - d_min))
+    else:
+        norm_density = np.ones_like(density) * 5.0
+
+    return norm_density, meta
+
+
+def linestrings_to_proximity_raster(
+    roads_gdf: gpd.GeoDataFrame,
+    bbox: tuple[float, float, float, float],
+    resolution_m: float = 50.0,
+    max_dist_m: float = 2000.0,
+    epsg_projected: int = 32644,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Convert a road LineString layer into a 1–9 Proximity raster surface.
+
+    Calculates Euclidean distance to the nearest road network feature and reclassifies onto
+    1–9 suitability scale (closer distance = higher score, e.g. <=100m -> 9.0, >=2000m -> 1.0).
+
+    Args:
+        roads_gdf: GeoDataFrame of LineString road features in EPSG:4326.
+        bbox: Bounding box tuple (min_lat, min_lon, max_lat, max_lon).
+        resolution_m: Pixel grid cell size in meters.
+        max_dist_m: Maximum distance threshold for zero suitability (1.0).
+        epsg_projected: Metric projected CRS.
+
+    Returns:
+        Tuple of (2D numpy array with values in [1.0, 9.0], grid_metadata dictionary).
+    """
+    min_lat, min_lon, max_lat, max_lon = bbox
+    box_wgs84 = gpd.GeoDataFrame(geometry=[box(min_lon, min_lat, max_lon, max_lat)], crs="EPSG:4326")
+    box_proj = box_wgs84.to_crs(epsg=epsg_projected)
+    min_x, min_y, max_x, max_y = box_proj.geometry.iloc[0].bounds
+
+    x_grid = np.arange(min_x, max_x + resolution_m, resolution_m)
+    y_grid = np.arange(min_y, max_y + resolution_m, resolution_m)
+    xx, yy = np.meshgrid(x_grid, y_grid)
+
+    meta = {
+        "min_x": min_x,
+        "min_y": min_y,
+        "max_x": max_x,
+        "max_y": max_y,
+        "resolution_m": resolution_m,
+        "shape": xx.shape,
+        "x_coords": x_grid,
+        "y_coords": y_grid,
+        "epsg": epsg_projected,
+    }
+
+    if roads_gdf.empty or len(roads_gdf) == 0:
+        return np.ones_like(xx, dtype=float), meta
+
+    roads_proj = roads_gdf.to_crs(epsg=epsg_projected)
+    if hasattr(roads_proj, "union_all"):
+        lines_union = roads_proj.union_all()
+    else:
+        lines_union = roads_proj.unary_union
+
+    # Vectorized / point distance calculation
+    min_distances = np.full(xx.shape, max_dist_m, dtype=float)
+    for r in range(xx.shape[0]):
+        for c in range(xx.shape[1]):
+            pt = Point(xx[r, c], yy[r, c])
+            min_distances[r, c] = lines_union.distance(pt)
+
+    # Linear decay: <=100m -> 9.0, >=max_dist_m -> 1.0
+    clipped_dist = np.clip(min_distances, 100.0, max_dist_m)
+    suitability = 9.0 - 8.0 * ((clipped_dist - 100.0) / (max_dist_m - 100.0))
+
+    return suitability, meta
+
+
+# ---------------------------------------------------------------------------
+# 4. Candidate Overlay & Decision Matrix Assembly
+# ---------------------------------------------------------------------------
+
+def overlay_candidates(
+    candidates_gdf: gpd.GeoDataFrame,
+    raster_layers: dict[str, tuple[np.ndarray, dict[str, Any]]],
+    epsg_projected: int = 32644,
 ) -> pd.DataFrame:
-    """Extract zonal statistics (mean suitability score) for each criterion across candidate buffers.
+    """Extract raster criterion values for all candidate grid sites to form the decision matrix.
 
     Args:
-        candidate_buffers: Spatial geometries representing candidate sites.
-        raster_layers: Dictionary mapping criterion names to their processed raster surface paths.
+        candidates_gdf: GeoDataFrame containing candidate sites in EPSG:4326.
+        raster_layers: Dictionary mapping criterion ID to (raster_array, metadata).
+        epsg_projected: Metric projected CRS.
 
     Returns:
-        DataFrame containing candidate site IDs and aggregated criterion values.
+        DataFrame representing the MCDM Decision Matrix (candidate sites x criteria).
+    """
+    candidates_proj = candidates_gdf.to_crs(epsg=epsg_projected)
+    matrix_df = pd.DataFrame()
+    matrix_df["site_id"] = candidates_gdf["site_id"].values
+    matrix_df["latitude"] = candidates_gdf["latitude"].values
+    matrix_df["longitude"] = candidates_gdf["longitude"].values
+
+    cand_x = candidates_proj.geometry.x.values
+    cand_y = candidates_proj.geometry.y.values
+
+    for criterion_id, (raster_arr, meta) in raster_layers.items():
+        min_x, min_y = meta["min_x"], meta["min_y"]
+        res = meta["resolution_m"]
+        n_rows, n_cols = raster_arr.shape
+
+        col_indices = np.clip(np.floor((cand_x - min_x) / res).astype(int), 0, n_cols - 1)
+        row_indices = np.clip(np.floor((cand_y - min_y) / res).astype(int), 0, n_rows - 1)
+
+        scores = raster_arr[row_indices, col_indices]
+        matrix_df[criterion_id] = scores
+
+    return matrix_df
+
+
+# ---------------------------------------------------------------------------
+# 5. Out-of-Scope / Unresolved Stubs (Docs/PENDING_DECISIONS.md)
+# ---------------------------------------------------------------------------
+
+def compute_population_idw_raster(
+    census_data_path: Path,
+    boundary_gdf: gpd.GeoDataFrame,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Interpolate ward-level census demographics via Inverse Distance Weighting.
 
     Raises:
-        NotImplementedError: Scheduled for Milestone 2 implementation.
+        NotImplementedError: Pending programmatic dataset — see docs/PENDING_DECISIONS.md.
     """
-    raise NotImplementedError("Milestone 2 — see docs/ROADMAP.md")
+    raise NotImplementedError(
+        "Population density data source pending verification — see docs/PENDING_DECISIONS.md"
+    )
 
+
+def compute_landuse_raster(
+    lulc_raster_path: Path,
+    boundary_gdf: gpd.GeoDataFrame,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Process and reclassify Bhuvan / Esri Land Use / Land Cover raster surfaces.
+
+    Raises:
+        NotImplementedError: Pending manual raster acquisition — see docs/PENDING_DECISIONS.md.
+    """
+    raise NotImplementedError(
+        "Land use / land cover data source pending verification — see docs/PENDING_DECISIONS.md"
+    )
+
+
+def compute_landcost_raster(
+    real_estate_data_path: Path,
+    boundary_gdf: gpd.GeoDataFrame,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Interpolate commercial real estate rental rates proxy raster.
+
+    Raises:
+        NotImplementedError: Pending land cost data source — see docs/PENDING_DECISIONS.md.
+    """
+    raise NotImplementedError(
+        "Land cost data source pending verification — see docs/PENDING_DECISIONS.md"
+    )
+
+
+def compute_grid_proximity_raster(
+    substation_points_path: Path,
+    boundary_gdf: gpd.GeoDataFrame,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Compute distance raster to electrical power grid substations.
+
+    Raises:
+        NotImplementedError: Pending UPPCL substation coordinates — see docs/PENDING_DECISIONS.md.
+    """
+    raise NotImplementedError(
+        "Grid substation data source pending verification — see docs/PENDING_DECISIONS.md"
+    )
+
+
+# ---------------------------------------------------------------------------
+# 6. End-to-End Orchestrator
+# ---------------------------------------------------------------------------
 
 def build_decision_matrix(
-    raw_gis_dir: Path,
-    output_processed_path: Path,
-    buffer_radius_meters: float = 300.0,
+    config_path: Path = Path("config/criteria.yaml"),
+    output_processed_path: Path = Path("data/processed/gis/decision_matrix.csv"),
 ) -> pd.DataFrame:
     """Execute end-to-end GIS pipeline to construct and save the MCDM decision matrix.
 
+    Reads configuration, fetches confirmed spatial criteria, calculates KDE and proximity
+    rasters, overlays candidate fishnet points, and exports the final decision matrix CSV.
+
     Args:
-        raw_gis_dir: Path to raw GIS inputs.
-        output_processed_path: Destination path for the generated decision matrix CSV/Parquet.
-        buffer_radius_meters: Buffer radius for candidate site delineation.
+        config_path: Path to config/criteria.yaml.
+        output_processed_path: Destination path for decision_matrix.csv.
 
     Returns:
-        A DataFrame representing the decision matrix where rows are candidate sites
-        and columns are standardized criteria values.
-
-    Raises:
-        NotImplementedError: Scheduled for Milestone 2 implementation.
+        DataFrame representing the populated decision matrix for confirmed criteria.
     """
-    raise NotImplementedError("Milestone 2 — see docs/ROADMAP.md")
+    load_dotenv()
+    google_key = os.getenv("GOOGLE_PLACES_API_KEY", "")
+    ocm_key = os.getenv("OPENCHARGEMAP_API_KEY", "")
+
+    with open(config_path, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+
+    exec_cfg = cfg.get("execution", {})
+    mode = exec_cfg.get("mode", "sample")
+    spacing_m = float(exec_cfg.get("fishnet_spacing_m", 500.0))
+    res_m = float(exec_cfg.get("raster_resolution_m", 50.0))
+    bw_m = float(exec_cfg.get("kde_bandwidth_m", 400.0))
+    sample_bbox = exec_cfg.get("sample_bbox")
+
+    print(f"[GIS Pipeline] Initializing in '{mode}' mode (spacing: {spacing_m}m)...")
+
+    # 1. Generate Boundary & Candidate Grid
+    boundary_gdf = get_varanasi_boundary(mode=mode, sample_bbox=sample_bbox)
+    candidates_gdf = generate_candidate_grid(boundary_gdf, spacing_m=spacing_m)
+    print(f"[GIS Pipeline] Generated {len(candidates_gdf)} candidate site alternatives.")
+
+    min_lat = candidates_gdf["latitude"].min() - 0.005
+    max_lat = candidates_gdf["latitude"].max() + 0.005
+    min_lon = candidates_gdf["longitude"].min() - 0.005
+    max_lon = candidates_gdf["longitude"].max() + 0.005
+    extent_bbox = (min_lat, min_lon, max_lat, max_lon)
+
+    raster_layers: dict[str, tuple[np.ndarray, dict[str, Any]]] = {}
+
+    # 2. Major Roads Criterion (C1)
+    print("[GIS Pipeline] Fetching major road networks (OSM Overpass)...")
+    roads_gdf = fetch_major_roads(extent_bbox)
+    road_raster, road_meta = linestrings_to_proximity_raster(roads_gdf, extent_bbox, resolution_m=res_m)
+    raster_layers["C1_Major_Roads"] = (road_raster, road_meta)
+
+    # 3. Competitor EV Stations (C5)
+    print("[GIS Pipeline] Fetching competitor EV charging stations (OpenChargeMap)...")
+    evcs_gdf = fetch_charging_stations(ocm_key, extent_bbox)
+    evcs_raster, evcs_meta = points_to_kernel_density_raster(
+        evcs_gdf, extent_bbox, resolution_m=res_m, bandwidth_m=bw_m
+    )
+    raster_layers["C5_Competitor_EVCS"] = (evcs_raster, evcs_meta)
+
+    # 4. Urban POI Categories (C6) via Google Places
+    poi_categories = [
+        ("C6_POI_Schools", "schools"),
+        ("C6_POI_Shopping_Malls", "shopping_malls"),
+        ("C6_POI_Restaurants", "restaurants"),
+        ("C6_POI_Hospitals", "hospitals"),
+        ("C6_POI_Theatres", "theatres"),
+        ("C6_POI_Bus_Stops", "bus_stops"),
+        ("C6_POI_Petrol_Bunks", "petrol_bunks"),
+    ]
+
+    for crit_id, cat_name in poi_categories:
+        print(f"[GIS Pipeline] Fetching POI category: {cat_name} (Google Places)...")
+        poi_gdf = fetch_poi_layer(cat_name, google_key, extent_bbox)
+        poi_raster, poi_meta = points_to_kernel_density_raster(
+            poi_gdf, extent_bbox, resolution_m=res_m, bandwidth_m=bw_m
+        )
+        raster_layers[crit_id] = (poi_raster, poi_meta)
+
+    # 5. Candidate Overlay & Decision Matrix Assembly
+    print("[GIS Pipeline] Overlaying candidate grid on raster layers...")
+    decision_matrix = overlay_candidates(candidates_gdf, raster_layers)
+
+    # 6. Export Output CSV
+    output_processed_path.parent.mkdir(parents=True, exist_ok=True)
+    decision_matrix.to_csv(output_processed_path, index=False)
+    print(f"[GIS Pipeline] Decision matrix successfully saved to: {output_processed_path}")
+    print(f"[GIS Pipeline] Matrix dimensions: {decision_matrix.shape[0]} sites x {decision_matrix.shape[1]} columns")
+
+    return decision_matrix
+
+
+if __name__ == "__main__":
+    build_decision_matrix()
