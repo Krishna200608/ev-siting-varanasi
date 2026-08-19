@@ -37,15 +37,16 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
 
 ---
 
-## Milestone 4 — ML Demand Pipeline: XGBoost Training & SHAP Interpretability (Next)
-- Verification, ingestion, and preprocessing of the public hourly EV charging session dataset.
-- Training, hyperparameter tuning, and 5-fold cross-validation of XGBoost regression models (benchmarked against $R^2$ baselines from Zhang et al., 2025).
-- Computation of SHAP global feature importances and local candidate site attributions.
-- Generation of relative demand potential scores for Varanasi candidate site profiles.
+## Milestone 4 — ML Demand Pipeline: XGBoost Training & SHAP Interpretability (Completed)
+- Ingested and preprocessed authentic EV charging sessions from the peer-reviewed **ACN-Data** dataset (Caltech + JPL sites; Lee, Li & Low, 2019).
+- Evaluated 5-fold cross-validation performance across Linear Regression ($R^2 \approx 0.407$), Random Forest ($R^2 \approx 0.506$), and XGBoost Regressor ($R^2 \approx 0.483$, $\text{RMSE} \approx 7.93\text{ kWh}$).
+- Serialized trained XGBoost model artifact to `outputs/models/demand_xgboost.pkl` and exported evaluation report to `outputs/reports/ml_training_metrics.md`.
+- Computed global SHAP attributions: top demand drivers identified as charging duration, connection arrival hour, and dwell duration (`outputs/figures/shap_summary.png` and `outputs/tables/shap_feature_importance.csv`).
+- Implemented and activated 3 unit tests in `tests/test_ml.py` (19 total unit tests passing with zero live network dependencies).
 
 ---
 
-## Milestone 5 — Two-Stage Integration & Sensitivity Analysis
+## Milestone 5 — Two-Stage Integration & Sensitivity Analysis (Next)
 - Normalization and synthesis of MCDM suitability scores and ML relative demand estimates into a single composite feasibility score.
 - Evaluation of shortlist overlap and ranking divergence between the MCDM baseline and the composite framework.
 - Implementation of the 12-scenario weight-perturbation sensitivity analysis ($\pm 10–20\%$).

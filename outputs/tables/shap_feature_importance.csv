@@ -1,0 +1,7 @@
+feature,mean_abs_shap
+charging_duration_hours,6.2577
+connection_hour,0.9997
+dwell_duration_hours,0.5184
+day_of_week,0.4385
+month,0.0427
+is_weekend,0.0
