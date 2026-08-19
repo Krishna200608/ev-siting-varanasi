@@ -15,8 +15,8 @@ The project combines two independent methodological pipelines that merge in the 
 3. Competitor EV Density (OpenChargeMap)           3. XGBoost Training (5-fold CV)
 4. POI Density Surfaces (Google Places New API)    4. SHAP Feature Attribution
 5. Candidate Overlay -> Decision Matrix            5. Relative Demand Inference
-6. CRITIC / Entropy Weighting (Milestone 3)
-7. TOPSIS / WASPAS Site Ranking (Milestone 3)
+6. CRITIC / Entropy Weighting (Completed)
+7. TOPSIS / WASPAS Site Ranking (Completed)
                        │                                         │
                        └───────────────────┬─────────────────────┘
                                            ▼
@@ -33,7 +33,7 @@ The project combines two independent methodological pipelines that merge in the 
 
 | Directory / File | Synopsis Stage / Pipeline | Purpose & Theoretical Basis |
 |---|---|---|
-| `config/criteria.yaml` | Configuration | Defines MCDM criteria, execution mode (`sample` vs `full`), and parameters. |
+| `config/criteria.yaml` | Configuration | Defines MCDM criteria, orientation types (`benefit` vs `cost`), execution mode (`sample` vs `full`), and parameters. |
 | `data/raw/gis/` | Pipeline A: Data Ingestion | Raw spatial data: OSM shapefiles/GeoJSON, Census population, Bhuvan land cover. |
 | `data/raw/demand/` | Pipeline B: Data Ingestion | External public hourly EV charging session dataset (e.g., California / Kaggle). |
 | `data/processed/gis/` | Pipeline A: GIS Preprocessing | Generated decision matrix (`decision_matrix.csv`). |
@@ -43,7 +43,7 @@ The project combines two independent methodological pipelines that merge in the 
 | `src/ml/` | Pipeline B: Stage 3 | XGBoost regression training, cross-validation, and SHAP explainability. *(Zhang et al., 2025)* |
 | `src/integration/` | Stage 4: Synthesis | Composite feasibility scoring and 12-scenario weight-perturbation sensitivity testing. |
 | `notebooks/` | Exploration | Step-by-step interactive Jupyter notebooks for GIS, MCDM, and ML phases. |
-| `outputs/` | Deliverables | Generated figures (SHAP plots, suitability maps), ranking tables, and reports. |
+| `outputs/` | Deliverables | Consolidated ranking tables (`outputs/tables/mcdm_rankings.csv`), SHAP plots, suitability maps. |
 | `tests/` | Quality Assurance | Pytest test suites verifying mathematical properties and data integrity. |
 | `docs/ROADMAP.md` | Governance | Multi-week implementation roadmap across Milestones 1 to 5. |
 | `docs/PENDING_DECISIONS.md` | Governance | Authoritative list of confirmed vs. pending data sources and architectural decisions. |
@@ -85,19 +85,23 @@ Key requirements:
 
 ---
 
-## 4. Running the GIS Pipeline (Milestone 2)
+## 4. Running the Pipelines
 
-### Execution Modes (`sample` vs. `full`)
-In `config/criteria.yaml`, you can configure the `mode` parameter:
-- **`mode: "sample"` (Default):** Restricts the spatial fishnet grid to a small bounding box (~2.5 km $\times$ 2.7 km) covering central Varanasi (Godowlia / Dashashwamedh / Cantonment). This minimizes Google Places API quota usage while generating an authentic decision matrix for testing.
-- **`mode: "full"`:** Queries OpenStreetMap Nominatim for the entire municipal extent of Varanasi and generates a city-wide fishnet grid.
-
-### Execute Decision Matrix Generation
+### Pipeline A — Stage 1: GIS Decision Matrix Builder
 ```bash
 python src/gis/build_decision_matrix.py
 ```
-Output:
-The processed decision matrix is saved to `data/processed/gis/decision_matrix.csv`.
+Output: `data/processed/gis/decision_matrix.csv` (dynamically extracted spatial criteria scores).
+
+### Pipeline A — Stage 2: MCDM Weighting & Ranking
+```bash
+python -c "from src.mcdm.pipeline import run_mcdm_pipeline; run_mcdm_pipeline()"
+```
+Output: `outputs/tables/mcdm_rankings.csv` containing candidate coordinates, suitability scores, and ranks across all 4 combinations:
+- `topsis_critic_score`, `topsis_critic_rank` (Primary academic benchmark)
+- `topsis_entropy_score`, `topsis_entropy_rank`
+- `waspas_critic_score`, `waspas_critic_rank`
+- `waspas_entropy_score`, `waspas_entropy_rank`
 
 ---
 

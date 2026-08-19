@@ -24,15 +24,20 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
 
 ---
 
-## Milestone 3 — MCDM Pipeline: Criteria Weighting & Site Ranking (Next)
-- Implementation of CRITIC (primary) and Entropy (secondary) objective criteria weighting methods.
-- Implementation of TOPSIS (primary) and WASPAS (cross-check) multi-criteria ranking algorithms.
-- Ingestion and processing of `data/processed/gis/decision_matrix.csv`.
-- Validation of ranking stability against Indian case study benchmarks (Rashmitha et al., 2024).
+## Milestone 3 — MCDM Pipeline: Weighting & Ranking (Completed)
+- Implemented objective criteria weighting algorithms in `src/mcdm/weighting.py`:
+  - **CRITIC**: Standard deviation contrast intensity + Pearson intercriteria correlation conflict measure with robust zero-variance handling.
+  - **Shannon Entropy**: Probability proportion transformation + information entropy divergence.
+- Implemented multi-criteria alternative ranking algorithms in `src/mcdm/ranking.py`:
+  - **TOPSIS**: Vector normalization + Euclidean distance to Positive-Ideal ($A^+$) and Negative-Ideal ($A^-$) solutions.
+  - **WASPAS**: Linear normalization + joint Weighted Sum Model (WSM) and Weighted Product Model (WPM) scoring ($\lambda = 0.5$).
+- Dynamic criteria column detection (filtering out metadata `site_id`, `latitude`, `longitude`).
+- Implemented end-to-end pipeline orchestrator `run_mcdm_pipeline()` in `src/mcdm/pipeline.py` generating consolidated 4-combination ranking table at `outputs/tables/mcdm_rankings.csv`.
+- Activated and expanded unit tests in `tests/test_mcdm.py` (16 total tests passing across GIS and MCDM).
 
 ---
 
-## Milestone 4 — ML Demand Pipeline: XGBoost Training & SHAP Interpretability
+## Milestone 4 — ML Demand Pipeline: XGBoost Training & SHAP Interpretability (Next)
 - Verification, ingestion, and preprocessing of the public hourly EV charging session dataset.
 - Training, hyperparameter tuning, and 5-fold cross-validation of XGBoost regression models (benchmarked against $R^2$ baselines from Zhang et al., 2025).
 - Computation of SHAP global feature importances and local candidate site attributions.
