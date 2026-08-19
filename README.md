@@ -104,20 +104,30 @@ Output: `outputs/tables/mcdm_rankings.csv` containing candidate coordinates, sui
 - `waspas_entropy_score`, `waspas_entropy_rank`
 
 ### Pipeline B — Stage 3: ML Demand Forecasting & SHAP Explainability
+
+#### 1. Full-Feature Descriptive Model (General Demand Drivers — RQ2)
 ```bash
 python -c "from src.ml.train_demand_model import train_and_save_pipeline; from src.ml.explain import generate_shap_artifacts; model, X, metrics = train_and_save_pipeline(); generate_shap_artifacts(model, X)"
 ```
-Generated Artifacts:
-- **Trained Model:** `outputs/models/demand_xgboost.pkl` (Serialised XGBoost regressor)
-- **Evaluation Report:** `outputs/reports/ml_training_metrics.md` (5-fold CV comparison vs Linear Regression and Random Forest)
-- **SHAP Summary Plot:** `outputs/figures/shap_summary.png` (Global beeswarm feature attribution)
-- **Feature Importance Table:** `outputs/tables/shap_feature_importance.csv` (Ranked mean absolute SHAP importances)
+- **Trained Model:** `outputs/models/demand_xgboost.pkl` ($R^2 \approx 0.4832$, $\text{RMSE} \approx 7.93\text{ kWh}$)
+- **Evaluation Report:** `outputs/reports/ml_training_metrics.md`
+- **SHAP Summary Plot:** `outputs/figures/shap_summary.png`
+- **Feature Importance Table:** `outputs/tables/shap_feature_importance.csv`
+
+#### 2. Ex-Ante Transferable Model (Operational Siting Model — Milestone 5)
+```bash
+python -c "from src.ml.train_demand_model import train_and_save_transferable_pipeline; from src.ml.explain import generate_shap_artifacts; model, X, metrics = train_and_save_transferable_pipeline(); generate_shap_artifacts(model, X, 'outputs/figures/shap_summary_transferable.png', 'outputs/tables/shap_feature_importance_transferable.csv')"
+```
+- **Trained Model:** `outputs/models/demand_xgboost_transferable.pkl` ($R^2 \approx 0.0213$, $\text{RMSE} \approx 10.91\text{ kWh}$)
+- **Evaluation Report:** `outputs/reports/ml_training_metrics_transferable.md`
+- **SHAP Summary Plot:** `outputs/figures/shap_summary_transferable.png`
+- **Feature Importance Table:** `outputs/tables/shap_feature_importance_transferable.csv`
 
 ---
 
 ## 5. Running Tests
 
-To run the complete test suite (19 tests covering GIS, MCDM, and ML with zero live network calls):
+To run the complete test suite (20 tests covering GIS, MCDM, and ML with zero live network calls):
 ```bash
 pytest tests/ -v
 ```

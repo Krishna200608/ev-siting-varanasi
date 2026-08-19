@@ -27,9 +27,18 @@ This document is the **authoritative reference** for confirmed data sources, res
 - **Replacement Selection (ACN-Data):**
   - Selected **ACN-Data** (Caltech Adaptive Charging Network; Lee, Li & Low, 2019, *ACM e-Energy '19*), a real, peer-reviewed public dataset of EV charging sessions from Caltech, JPL, and Office-1 sites.
   - Real fields include `connectionTime`, `disconnectTime`, `kWhDelivered`, `doneChargingTime`, `userInputs`, `siteID`, `stationID`, `spaceID`.
-- **Blocking Status:**
-  - ACN-Data API requires free user registration at `https://ev.caltech.edu/dataset` to obtain an `ACNDATA_API_TOKEN`.
-  - Contributor must register, obtain token, and add `ACNDATA_API_TOKEN=<token>` to `.env`.
+- **Resolution Status:** Fully resolved in Milestone 4. Ingested 2,398 real sessions (`caltech` + `jpl`).
+
+### AD-5: Dual-Model Demand Strategy (Descriptive Model vs. Ex-Ante Transferable Model)
+- **Problem Statement:** SHAP feature attribution on the full-feature ACN-Data model ($R^2 \approx 0.483$) revealed that $\sim 75.8\%$ of predictive power stems from `charging_duration_hours` and `dwell_duration_hours`. However, in an ex-ante siting context for candidate sites where no station exists, session duration cannot be observed prior to construction.
+- **Architectural Decision:** Maintain two distinct models:
+  1. **Full-Feature Descriptive Model (`outputs/models/demand_xgboost.pkl`):** Includes duration and temporal features ($R^2 \approx 0.4832$, $\text{RMSE} \approx 7.93\text{ kWh}$). Fulfills Research Question 2 (**RQ2**) by diagnosing general empirical drivers of EV charging demand.
+  2. **Ex-Ante Transferable Model (`outputs/models/demand_xgboost_transferable.pkl`):** Restricts features strictly to ex-ante observable temporal variables (`connection_hour`, `day_of_week`, `is_weekend`, `month`). Yields $R^2 \approx 0.0213$ ($\text{RMSE} \approx 10.91\text{ kWh}$). This is the model applied in Milestone 5 to Varanasi candidate sites to evaluate pre-launch relative demand priors without circular data leakage.
+
+### AD-6: Explicit Rejection of Heuristic / Fabricated Dwell-Time Proxies
+- **Considered Option:** Attempting to boost ex-ante $R^2$ by engineering an assumption-based heuristic mapping POI categories (e.g. malls $\to$ 3.5h, restaurants $\to$ 2.0h, highways $\to$ 0.75h) into a synthetic `proxy_dwell_time` feature.
+- **Decision:** **EXPLICITLY REJECTED**.
+- **Rationale:** Assigning unverified constants by POI category and feeding them into a model where duration drives $\sim 76\%$ of variance produces output demand scores that merely re-state invented numbers rather than capturing real predictive signal. This violates the project's core zero-fabrication rule. The low $R^2 \approx 0.0213$ of the pure temporal model is an honest, substantive finding: it proves that purely temporal variables carry little standalone demand information, and that spatial GIS-MCDM suitability captures the vast majority of actionable signal available prior to station deployment.
 
 ---
 

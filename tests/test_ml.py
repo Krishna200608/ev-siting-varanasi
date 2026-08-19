@@ -12,6 +12,7 @@ import pandas as pd
 from src.ml.train_demand_model import (
     preprocess_demand_data,
     train_xgboost_regressor,
+    train_transferable_demand_model,
     predict_relative_demand,
 )
 from src.ml.explain import (
@@ -43,7 +44,7 @@ def sample_demand_data() -> tuple[pd.DataFrame, pd.Series]:
 
 
 def test_train_xgboost_regressor_cv(sample_demand_data: tuple[pd.DataFrame, pd.Series]) -> None:
-    """Test that XGBoost model trains with 5-fold CV and returns positive R2 on synthetic data."""
+    """Test that full-feature XGBoost model trains with 5-fold CV and returns positive R2 on synthetic data."""
     X, y = sample_demand_data
     model, metrics = train_xgboost_regressor(X, y, cv_folds=5, random_state=42)
     assert model is not None
@@ -56,10 +57,23 @@ def test_train_xgboost_regressor_cv(sample_demand_data: tuple[pd.DataFrame, pd.S
     assert metrics["r2"] > 0.0
 
 
+def test_train_transferable_demand_model_cv(sample_demand_data: tuple[pd.DataFrame, pd.Series]) -> None:
+    """Test that transferable XGBoost model trains strictly on ex-ante temporal features."""
+    X, y = sample_demand_data
+    model, metrics = train_transferable_demand_model(X, y, cv_folds=5, random_state=42)
+    assert model is not None
+    assert "r2" in metrics
+    assert "rmse" in metrics
+    assert "mae" in metrics
+    assert "xgboost" in metrics
+    assert "random_forest" in metrics
+    assert "linear_regression" in metrics
+
+
 def test_predict_relative_demand_bounds(sample_demand_data: tuple[pd.DataFrame, pd.Series]) -> None:
     """Test that relative demand inference returns normalized scores bounded in [0.0, 1.0]."""
     X, y = sample_demand_data
-    model, _ = train_xgboost_regressor(X, y, cv_folds=3, random_state=42)
+    model, _ = train_transferable_demand_model(X, y, cv_folds=3, random_state=42)
     candidate_features = X.head(10)
     scores = predict_relative_demand(model, candidate_features)
     assert isinstance(scores, pd.Series)

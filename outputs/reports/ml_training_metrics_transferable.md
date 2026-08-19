@@ -1,32 +1,25 @@
-# ML Demand Forecasting: Transferability-Constrained Siting Report (Milestone 4b)
+# ML Demand Forecasting: Transferability-Constrained Model Report (Stage 3 / Ex-Ante Siting)
 
-**Academic Context:** Operationalizing Demand Forecasting for Ex-Ante Candidate EV Siting in Varanasi, India  
-**Dataset Foundation:** ACN-Data (Lee, Li & Low, 2019; Caltech + JPL, $N = 2,396$ sessions)  
-
----
-
-## 1. Tripartite Model Comparison Across Observability Tiers
-
-| Observability Tier | Model Architecture | Features Included | Ex-Ante Observability in Varanasi | Mean $R^2$ | Mean RMSE (kWh) | Mean MAE (kWh) |
-|---|---|---|---|---|---|---|
-| **Tier 1: Pure Transferable** | XGBoost Regressor | `connection_hour`, `day_of_week`, `is_weekend`, `month` | **Fully Observable** (exogenous temporal calendar) | **0.0213** ($\pm 0.0192$) | 10.9116 | 8.0311 |
-| **Tier 2: Proxy-Extended** | XGBoost Regressor | Temporal + Proxied `dwell_duration_hours` | **Observable via Proxy** (estimated from POI/land-use type) | **0.1734** ($\pm 0.0473$) | 10.0327 | 7.2553 |
-| **Tier 3: Full Diagnostic** | XGBoost Regressor | Temporal + Dwell + `charging_duration_hours` | **Unobservable Ex-Ante** (requires existing station) | **0.4832** ($\pm 0.0336$) | 7.9299 | 5.3362 |
+**Dataset Foundation:** ACN-Data (Caltech Adaptive Charging Network; Lee, Li & Low, 2019, *ACM e-Energy '19*)  
+**Sample Size:** 2,396 cleaned EV charging session records (Caltech + JPL sites)  
+**Target Variable:** Energy Delivered ($y = \text{kWhDelivered}$, mean = 12.32 kWh, std = 11.07 kWh)  
+**Features Included (Ex-Ante Strictly Observable):** `connection_hour`, `day_of_week`, `is_weekend`, `month`  
+**Features Excluded (Unobservable Ex-Ante):** `charging_duration_hours`, `dwell_duration_hours`  
 
 ---
 
-## 2. Core Empirical Findings & Siting Implications
+## 5-Fold Cross-Validation Performance Comparison
 
-1. **The Ex-Ante Variance Gap:**
-   - Pure temporal variables explain only **2.13%** of single-session energy variance ($R^2 = 0.0213$).
-   - This large drop from Tier 3 ($R^2 = 0.4832$) is an authentic, defensible empirical result: **most variance in EV charging demand is session-dependent and cannot be known before a site exists**.
-2. **Methodological Justification for Two-Stage Framework:**
-   - Because temporal demand models explain limited ex-ante variance on their own, spatial GIS-MCDM (Stage A: POI density, road accessibility, competitor deficit) is mathematically and methodologically indispensable for candidate site screening.
-3. **Role of Proxy-Extended Model (Tier 2):**
-   - Incorporating a contextual dwell-time proxy (e.g. 2–3h for retail/mall, 6–8h for workplace, 0.5–1h for transit corridor) raises explained variance to **17.34%** ($R^2 = 0.1734$), providing a structured bridge for Milestone 5 integration.
+| Model Architecture | Mean $R^2$ | $R^2$ Std | Mean RMSE (kWh) | Mean MAE (kWh) |
+|---|---|---|---|---|
+| **Linear Regression (Baseline)** | 0.0050 | $\pm$ 0.0103 | 11.0075 | 7.9950 |
+| **Random Forest Regressor** | 0.0140 | $\pm$ 0.0223 | 10.9513 | 8.0670 |
+| **XGBoost Regressor (Selected)** | **0.0213** | **$\pm$ 0.0192** | **10.9116** | **8.0311** |
 
 ---
 
-## 3. Milestone 5 Operational Designation
-- **Milestone 5 Siting Integration:** Will utilize the **Transferable / Proxy-Extended Demand Models** to infer candidate relative demand potential scores without data leakage.
-- **Academic Research Contribution:** Tier 3 Full Diagnostic Model remains the primary artifact for explaining generalized demand drivers under Research Question 2.
+## Substantive Methodological Findings & Implications for Ex-Ante Siting
+1. **Low Variance Explanation as a Genuine Finding:** Purely temporal features (hour of day, day of week, month) explain only a small fraction of charging demand variance ($R^2 \approx 0.0213$). This demonstrates that individual charging demand is overwhelmingly determined by physical session dwell duration rather than broad clock/calendar rhythms.
+2. **Ex-Ante Siting Reality:** In a greenfield site selection setting where no charging station exists, session duration is fundamentally unobservable. Attempting to artificially inflate $R^2$ by inventing heuristic dwell proxies would violate scientific integrity.
+3. **MCDM Primacy:** This empirical result strongly suggests that spatial Multi-Criteria Decision-Making (MCDM) criteria—such as road accessibility, competitor density, and POI agglomeration—capture the overwhelming majority of practically actionable information available prior to physical station deployment.
+4. **Role in Milestone 5 Integration:** Milestone 5 will apply this honest, transferable model as the relative demand component of the composite score to directly test whether ML demand integration alters the MCDM-only shortlist ranking.

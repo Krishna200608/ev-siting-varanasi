@@ -37,12 +37,12 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
 
 ---
 
-## Milestone 4 — ML Demand Pipeline: XGBoost Training & SHAP Interpretability (Completed)
+## Milestone 4 & 4b — ML Demand Pipeline & Transferability-Constrained Siting Model (Completed)
 - Ingested and preprocessed authentic EV charging sessions from the peer-reviewed **ACN-Data** dataset (Caltech + JPL sites; Lee, Li & Low, 2019).
-- Evaluated 5-fold cross-validation performance across Linear Regression ($R^2 \approx 0.407$), Random Forest ($R^2 \approx 0.506$), and XGBoost Regressor ($R^2 \approx 0.483$, $\text{RMSE} \approx 7.93\text{ kWh}$).
-- Serialized trained XGBoost model artifact to `outputs/models/demand_xgboost.pkl` and exported evaluation report to `outputs/reports/ml_training_metrics.md`.
-- Computed global SHAP attributions: top demand drivers identified as charging duration, connection arrival hour, and dwell duration (`outputs/figures/shap_summary.png` and `outputs/tables/shap_feature_importance.csv`).
-- Implemented and activated 3 unit tests in `tests/test_ml.py` (19 total unit tests passing with zero live network dependencies).
+- **Full-Feature Model (RQ2):** 5-fold CV on full feature set ($R^2 \approx 0.4832$, $\text{RMSE} \approx 7.93\text{ kWh}$); isolated charging duration as dominant demand driver (~75.8% SHAP weight). Artifacts: `outputs/models/demand_xgboost.pkl`, `outputs/reports/ml_training_metrics.md`.
+- **Ex-Ante Transferable Model (Milestone 5 Siting):** 5-fold CV on strictly observable ex-ante features (`connection_hour`, `day_of_week`, `is_weekend`, `month`), yielding $R^2 \approx 0.0213$, $\text{RMSE} \approx 10.91\text{ kWh}$. Explicitly rejected heuristic dwell-time proxies per zero-fabrication rules (AD-6). Artifacts: `outputs/models/demand_xgboost_transferable.pkl`, `outputs/reports/ml_training_metrics_transferable.md`.
+- Computed global SHAP attributions for both models (`outputs/figures/shap_summary*.png` and `outputs/tables/shap_feature_importance*.csv`).
+- Activated unit tests in `tests/test_ml.py` (20 total unit tests passing with zero live network dependencies).
 
 ---
 

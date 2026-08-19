@@ -3,11 +3,12 @@
 Synopsis Stage: Stage 3 — ML Demand Model Training & Evaluation.
 Theoretical Foundation: Zhang, Peng & Zeng (2025, Sustainability); Lee, Li & Low (2019, ACM e-Energy).
 
-This module trains an XGBoost gradient-boosted regression model on real-world EV charging
-session telemetry from the peer-reviewed ACN-Data dataset (Caltech Adaptive Charging Network).
-It learns nonlinear relationships between temporal demand rhythms (connection hour, day of week,
-weekend effects, seasonality) and session duration parameters to forecast charging energy demand (kWh).
-The trained model is then used to infer relative demand potential for Varanasi candidate site profiles.
+This module trains two distinct XGBoost gradient-boosted regression models on real-world EV charging
+session telemetry from the peer-reviewed ACN-Data dataset (Caltech Adaptive Charging Network):
+1. Full-Feature Descriptive Model: Learns relationships between temporal patterns, dwell/charging
+   duration parameters, and energy demand (kWh), addressing Research Question 2 (general demand drivers).
+2. Ex-Ante Transferable Model: Restricts feature inputs strictly to ex-ante observable variables
+   (connection hour, day of week, weekend indicator, month) for spatial application to Varanasi candidate sites.
 """
 
 import json
@@ -257,6 +258,74 @@ def train_xgboost_regressor(
     return final_model, metrics
 
 
+def train_transferable_demand_model(
+    X: pd.DataFrame,
+    y: pd.Series,
+    cv_folds: int = 5,
+    random_state: int = 42,
+) -> tuple[Any, dict[str, Any]]:
+    """Train and evaluate transferability-constrained demand model using only ex-ante observable features.
+
+    Restricts features strictly to ex-ante observable temporal variables: connection_hour,
+    day_of_week, is_weekend, and month. Explicitly excludes unobservable session duration features.
+
+    Args:
+        X: Feature matrix (must contain temporal columns).
+        y: Target charging energy demand vector.
+        cv_folds: Number of cross-validation splits (default: 5).
+        random_state: Random seed for reproducibility.
+
+    Returns:
+        Tuple containing fitted transferable XGBoost model and dictionary of cross-validated metrics.
+    """
+    transferable_cols = ["connection_hour", "day_of_week", "is_weekend", "month"]
+    available_cols = [c for c in transferable_cols if c in X.columns]
+    X_trans = X[available_cols].copy()
+
+    cv = KFold(n_splits=cv_folds, shuffle=True, random_state=random_state)
+
+    candidate_models = {
+        "linear_regression": LinearRegression(),
+        "random_forest": RandomForestRegressor(n_estimators=100, max_depth=6, random_state=random_state),
+        "xgboost": XGBRegressor(n_estimators=100, learning_rate=0.05, max_depth=4, random_state=random_state),
+    }
+
+    metrics: dict[str, Any] = {}
+
+    for name, candidate in candidate_models.items():
+        res = cross_validate(
+            candidate,
+            X_trans,
+            y,
+            cv=cv,
+            scoring={
+                "r2": "r2",
+                "neg_rmse": "neg_root_mean_squared_error",
+                "neg_mae": "neg_mean_absolute_error",
+            },
+        )
+        mean_r2 = float(np.mean(res["test_r2"]))
+        std_r2 = float(np.std(res["test_r2"]))
+        mean_rmse = float(-np.mean(res["test_neg_rmse"]))
+        mean_mae = float(-np.mean(res["test_neg_mae"]))
+
+        metrics[name] = {
+            "r2_mean": round(mean_r2, 4),
+            "r2_std": round(std_r2, 4),
+            "rmse_mean": round(mean_rmse, 4),
+            "mae_mean": round(mean_mae, 4),
+        }
+
+    metrics["r2"] = metrics["xgboost"]["r2_mean"]
+    metrics["rmse"] = metrics["xgboost"]["rmse_mean"]
+    metrics["mae"] = metrics["xgboost"]["mae_mean"]
+
+    final_model = XGBRegressor(n_estimators=100, learning_rate=0.05, max_depth=4, random_state=random_state)
+    final_model.fit(X_trans, y)
+
+    return final_model, metrics
+
+
 def predict_relative_demand(
     model: Any,
     candidate_features: pd.DataFrame,
@@ -290,7 +359,7 @@ def predict_relative_demand(
             aligned_X = candidate_features.copy()
             for col in expected_cols:
                 if col not in aligned_X.columns:
-                    # Provide sensible default feature values
+                    # Provide sensible default feature values for missing columns
                     if col == "connection_hour":
                         aligned_X[col] = 14
                     elif col == "day_of_week":
@@ -326,11 +395,11 @@ def train_and_save_pipeline(
     model_output_path: Path = Path("outputs/models/demand_xgboost.pkl"),
     report_output_path: Path = Path("outputs/reports/ml_training_metrics.md"),
 ) -> tuple[Any, pd.DataFrame, dict[str, Any]]:
-    """Execute complete demand modeling pipeline and save model and metrics report.
+    """Execute complete full-feature demand modeling pipeline and save model and metrics report.
 
     Args:
         raw_data_path: Path to raw ACN session JSON dataset.
-        model_output_path: Destination path for pickled XGBoost model.
+        model_output_path: Destination path for pickled full-feature XGBoost model.
         report_output_path: Destination path for Markdown training evaluation report.
 
     Returns:
@@ -350,11 +419,12 @@ def train_and_save_pipeline(
         pickle.dump(model, f)
 
     # Write Markdown metrics report
-    report_md = f"""# ML Demand Forecasting: Model Evaluation Report (Stage 3)
+    report_md = f"""# ML Demand Forecasting: Full-Feature Model Evaluation Report (Stage 3)
 
 **Dataset Foundation:** ACN-Data (Caltech Adaptive Charging Network; Lee, Li & Low, 2019, *ACM e-Energy '19*)  
 **Sample Size:** {len(X):,} cleaned EV charging session records (Caltech + JPL sites)  
 **Target Variable:** Energy Delivered ($y = \\text{{kWhDelivered}}$, mean = {y.mean():.2f} kWh, std = {y.std():.2f} kWh)  
+**Features Included:** `connection_hour`, `day_of_week`, `is_weekend`, `month`, `dwell_duration_hours`, `charging_duration_hours`  
 
 ---
 
@@ -368,9 +438,17 @@ def train_and_save_pipeline(
 
 ---
 
-## Methodological Insights & Transferability Rationale
-- **Predictive Signal Validation:** Unlike synthetic benchmark datasets, ACN-Data demonstrates robust empirical predictability ($R^2 \\approx {metrics['xgboost']['r2_mean']:.3f}$, RMSE $\\approx {metrics['xgboost']['rmse_mean']:.2f}\\text{{ kWh}}$).
-- **Core Drivers:** Charging duration and arrival connection hour capture fundamental physical and behavioral charging characteristics transferable as diurnal demand priors to Varanasi candidate site feasibility scoring.
+## Model Selection Rationale (Random Forest vs. XGBoost)
+Random Forest achieved a marginally higher point estimate for cross-validated explained variance ($R^2 = {metrics['random_forest']['r2_mean']:.4f} \\pm {metrics['random_forest']['r2_std']:.4f}$) compared to XGBoost ($R^2 = {metrics['xgboost']['r2_mean']:.4f} \\pm {metrics['xgboost']['r2_std']:.4f}$). However, the empirical cross-validation standard deviation intervals overlap substantially, indicating that the performance difference is not statistically significant. XGBoost was retained as the primary architectural model for the following deliberate, methodological reasons:
+1. **Methodological Consistency:** Aligns directly with the gradient boosting baseline established in Zhang, Peng & Zeng (2025).
+2. **Regularization & Generalization:** XGBoost incorporates $L_1$ (Lasso) and $L_2$ (Ridge) tree complexity penalties that reduce overfitting risks during spatial transfer learning.
+3. **Interpretability:** Native integration with `shap.TreeExplainer` enables exact, high-performance polynomial-time Shapley feature attribution.
+
+---
+
+## Methodological Insights & Transferability Boundary
+- **Diagnostic Value (RQ2):** The full model demonstrates strong empirical predictability ($R^2 \\approx {metrics['xgboost']['r2_mean']:.3f}$, RMSE $\\approx {metrics['xgboost']['rmse_mean']:.2f}\\text{{ kWh}}$) and identifies `charging_duration_hours` as the single dominant demand driver ($\\sim 75.8\\%$ SHAP weight).
+- **Transferability Limitation:** Because `charging_duration_hours` is unobservable prior to station construction, this model cannot be directly applied ex-ante to unbuilt Varanasi candidate sites without circular data leakage. See [`outputs/reports/ml_training_metrics_transferable.md`](ml_training_metrics_transferable.md) for the operational siting model.
 """
 
     with open(report_output_path, "w", encoding="utf-8") as f:
@@ -379,5 +457,74 @@ def train_and_save_pipeline(
     return model, X, metrics
 
 
+def train_and_save_transferable_pipeline(
+    raw_data_path: Path = Path("data/raw/demand/acn_data_sessions.json"),
+    model_output_path: Path = Path("outputs/models/demand_xgboost_transferable.pkl"),
+    report_output_path: Path = Path("outputs/reports/ml_training_metrics_transferable.md"),
+) -> tuple[Any, pd.DataFrame, dict[str, Any]]:
+    """Execute transferability-constrained demand modeling pipeline and save model and metrics report.
+
+    Restricts features strictly to ex-ante observable variables: connection_hour, day_of_week,
+    is_weekend, and month.
+
+    Args:
+        raw_data_path: Path to raw ACN session JSON dataset.
+        model_output_path: Destination path for pickled transferable XGBoost model.
+        report_output_path: Destination path for Markdown training evaluation report.
+
+    Returns:
+        Tuple of (fitted model, transferable feature DataFrame X_trans, metrics dictionary).
+    """
+    model_output_path = Path(model_output_path)
+    report_output_path = Path(report_output_path)
+
+    model_output_path.parent.mkdir(parents=True, exist_ok=True)
+    report_output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    X_full, y = preprocess_demand_data(raw_data_path)
+    transferable_cols = ["connection_hour", "day_of_week", "is_weekend", "month"]
+    X_trans = X_full[transferable_cols].copy()
+
+    model, metrics = train_transferable_demand_model(X_trans, y)
+
+    # Save model artifact
+    with open(model_output_path, "wb") as f:
+        pickle.dump(model, f)
+
+    # Write Markdown metrics report
+    report_md = f"""# ML Demand Forecasting: Transferability-Constrained Model Report (Stage 3 / Ex-Ante Siting)
+
+**Dataset Foundation:** ACN-Data (Caltech Adaptive Charging Network; Lee, Li & Low, 2019, *ACM e-Energy '19*)  
+**Sample Size:** {len(X_trans):,} cleaned EV charging session records (Caltech + JPL sites)  
+**Target Variable:** Energy Delivered ($y = \\text{{kWhDelivered}}$, mean = {y.mean():.2f} kWh, std = {y.std():.2f} kWh)  
+**Features Included (Ex-Ante Strictly Observable):** `connection_hour`, `day_of_week`, `is_weekend`, `month`  
+**Features Excluded (Unobservable Ex-Ante):** `charging_duration_hours`, `dwell_duration_hours`  
+
+---
+
+## 5-Fold Cross-Validation Performance Comparison
+
+| Model Architecture | Mean $R^2$ | $R^2$ Std | Mean RMSE (kWh) | Mean MAE (kWh) |
+|---|---|---|---|---|
+| **Linear Regression (Baseline)** | {metrics['linear_regression']['r2_mean']:.4f} | $\\pm$ {metrics['linear_regression']['r2_std']:.4f} | {metrics['linear_regression']['rmse_mean']:.4f} | {metrics['linear_regression']['mae_mean']:.4f} |
+| **Random Forest Regressor** | {metrics['random_forest']['r2_mean']:.4f} | $\\pm$ {metrics['random_forest']['r2_std']:.4f} | {metrics['random_forest']['rmse_mean']:.4f} | {metrics['random_forest']['mae_mean']:.4f} |
+| **XGBoost Regressor (Selected)** | **{metrics['xgboost']['r2_mean']:.4f}** | **$\\pm$ {metrics['xgboost']['r2_std']:.4f}** | **{metrics['xgboost']['rmse_mean']:.4f}** | **{metrics['xgboost']['mae_mean']:.4f}** |
+
+---
+
+## Substantive Methodological Findings & Implications for Ex-Ante Siting
+1. **Low Variance Explanation as a Genuine Finding:** Purely temporal features (hour of day, day of week, month) explain only a small fraction of charging demand variance ($R^2 \\approx {metrics['xgboost']['r2_mean']:.4f}$). This demonstrates that individual charging demand is overwhelmingly determined by physical session dwell duration rather than broad clock/calendar rhythms.
+2. **Ex-Ante Siting Reality:** In a greenfield site selection setting where no charging station exists, session duration is fundamentally unobservable. Attempting to artificially inflate $R^2$ by inventing heuristic dwell proxies would violate scientific integrity.
+3. **MCDM Primacy:** This empirical result strongly suggests that spatial Multi-Criteria Decision-Making (MCDM) criteria—such as road accessibility, competitor density, and POI agglomeration—capture the overwhelming majority of practically actionable information available prior to physical station deployment.
+4. **Role in Milestone 5 Integration:** Milestone 5 will apply this honest, transferable model as the relative demand component of the composite score to directly test whether ML demand integration alters the MCDM-only shortlist ranking.
+"""
+
+    with open(report_output_path, "w", encoding="utf-8") as f:
+        f.write(report_md)
+
+    return model, X_trans, metrics
+
+
 if __name__ == "__main__":
     train_and_save_pipeline()
+    train_and_save_transferable_pipeline()
