@@ -1,0 +1,6 @@
+feature,mean_abs_shap
+dwell_duration_hours,3.2917
+connection_hour,1.5148
+day_of_week,0.7944
+month,0.0476
+is_weekend,0.0

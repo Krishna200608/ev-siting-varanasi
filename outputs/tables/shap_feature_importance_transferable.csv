@@ -1,0 +1,5 @@
+feature,mean_abs_shap
+connection_hour,2.4231
+day_of_week,0.7972
+month,0.1942
+is_weekend,0.0
