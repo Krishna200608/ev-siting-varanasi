@@ -46,8 +46,10 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
 
 ---
 
-## Milestone 5 — Two-Stage Integration & Sensitivity Analysis (Next)
-- Normalization and synthesis of MCDM suitability scores and ML relative demand estimates into a single composite feasibility score.
-- Evaluation of shortlist overlap and ranking divergence between the MCDM baseline and the composite framework.
-- Implementation of the 12-scenario weight-perturbation sensitivity analysis ($\pm 10–20\%$).
-- Generation of final ranked shortlists, summary tables, maps, and executive report deliverables.
+## Milestone 5 — Two-Stage Integration, Temporal Profiling & Sensitivity Analysis (Completed)
+- **Spatial Primacy (*Where* to Site):** Established the Stage 2 GIS-MCDM TOPSIS-CRITIC ranking (`outputs/tables/mcdm_rankings.csv`) as the primary spatial site selection benchmark.
+- **Operational Demand Profiling (*When* Demand Occurs):** Generated 24-hour diurnal load curves (weekday vs. weekend) from the transferable XGBoost model, saved to `outputs/tables/temporal_demand_curve.csv` and `outputs/figures/temporal_demand_curve.png`.
+- **12-Scenario MCDM Sensitivity Analysis:** Evaluated weight perturbation robustness matching Rashmitha et al. (2024), demonstrating high shortlist stability ($\rho \ge 0.9613$ across S01–S11; 80–100% Top-5 candidate retention), saved to `outputs/tables/mcdm_sensitivity_results.csv` and `outputs/figures/mcdm_sensitivity_analysis.png`.
+- **Formal RQ3 Resolution (AD-8):** Published comprehensive synthesis report at `outputs/reports/rq3_ranking_comparison.md`.
+- **Unit Testing:** Implemented offline integration tests in `tests/test_integration.py` (23 total test cases passing).
+

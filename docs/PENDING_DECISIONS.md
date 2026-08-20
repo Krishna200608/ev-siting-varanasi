@@ -40,6 +40,13 @@ This document is the **authoritative reference** for confirmed data sources, res
 - **Decision:** **EXPLICITLY REJECTED**.
 - **Rationale:** Assigning unverified constants by POI category and feeding them into a model where duration drives $\sim 76\%$ of variance produces output demand scores that merely re-state invented numbers rather than capturing real predictive signal. This violates the project's core zero-fabrication rule. The low $R^2 \approx 0.0213$ of the pure temporal model is an honest, substantive finding: it proves that purely temporal variables carry little standalone demand information, and that spatial GIS-MCDM suitability captures the vast majority of actionable signal available prior to station deployment.
 
+### AD-8: Resolution of Spatial vs. Temporal Pipeline Integration (MCDM Primacy & Standalone Diurnal Profiling)
+- **Problem Statement:** In Milestone 5, compositing candidate site footfall with a single shared scalar $W_{\text{temporal}}$ via normalization was identified as mathematically inert (scalar cancels out under min-max normalization). Furthermore, deriving footfall from POI criteria redundantly double-counts criteria already weighted in the MCDM matrix.
+- **Decision:**
+  1. **Spatial Primacy (*Where* to Site):** The definitive spatial candidate site ranking is established as the Stage 2 GIS-MCDM ranking (`outputs/tables/mcdm_rankings.csv` with TOPSIS-CRITIC as primary benchmark).
+  2. **Operational Temporal Intelligence (*When* Demand Occurs):** The transferable ML demand model is evaluated as a standalone 24-hour diurnal profile (`outputs/tables/temporal_demand_curve.csv` and `outputs/figures/temporal_demand_curve.png`), informing operational scheduling, tariff structures, and transformer capacity at selected sites.
+  3. **RQ3 Resolution:** Formally documents that within available non-localized telemetry, ML demand models provide operational timing rather than spatial site differentiation.
+
 ---
 
 ## 2. Confirmed Data Sources & Implemented APIs

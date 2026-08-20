@@ -123,11 +123,20 @@ python -c "from src.ml.train_demand_model import train_and_save_transferable_pip
 - **SHAP Summary Plot:** `outputs/figures/shap_summary_transferable.png`
 - **Feature Importance Table:** `outputs/tables/shap_feature_importance_transferable.csv`
 
+### Stage 4: Two-Stage Integration, Temporal Profiling & Robustness
+```bash
+python src/integration/pipeline.py
+```
+Generated Deliverables:
+- **Formal Synthesis Report (RQ3):** `outputs/reports/rq3_ranking_comparison.md` (Direct RQ3 evaluation and MCDM spatial primacy documentation)
+- **Diurnal Demand Curve:** `outputs/tables/temporal_demand_curve.csv` & `outputs/figures/temporal_demand_curve.png` (24-hour weekday vs weekend load profile)
+- **12-Scenario Sensitivity Analysis:** `outputs/tables/mcdm_sensitivity_results.csv` & `outputs/figures/mcdm_sensitivity_analysis.png` (TOPSIS-CRITIC stability across criteria perturbations)
+
 ---
 
 ## 5. Running Tests
 
-To run the complete test suite (20 tests covering GIS, MCDM, and ML with zero live network calls):
+To run the complete test suite (23 tests covering GIS, MCDM, ML, and Integration with zero live network calls):
 ```bash
 pytest tests/ -v
 ```
