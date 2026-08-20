@@ -39,6 +39,10 @@ def run_mcdm_pipeline(
     Returns:
         DataFrame containing candidate site coordinates, scores, and ranks for all 4 combinations.
     """
+    decision_matrix_path = Path(decision_matrix_path)
+    config_path = Path(config_path)
+    output_table_path = Path(output_table_path)
+
     print(f"[MCDM Pipeline] Loading decision matrix from: {decision_matrix_path}")
     if not decision_matrix_path.exists():
         raise FileNotFoundError(f"Decision matrix not found at '{decision_matrix_path}'. Run GIS pipeline first.")

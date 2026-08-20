@@ -123,7 +123,7 @@ python -c "from src.ml.train_demand_model import train_and_save_transferable_pip
 - **SHAP Summary Plot:** `outputs/figures/shap_summary_transferable.png`
 - **Feature Importance Table:** `outputs/tables/shap_feature_importance_transferable.csv`
 
-### Stage 4: Two-Stage Integration, Temporal Profiling & Robustness
+### Stage 4: Two-Stage Integration, Temporal Profiling & Robustness (Sample Mode)
 ```bash
 python src/integration/pipeline.py
 ```
@@ -131,6 +131,24 @@ Generated Deliverables:
 - **Formal Synthesis Report (RQ3):** `outputs/reports/rq3_ranking_comparison.md` (Direct RQ3 evaluation and MCDM spatial primacy documentation)
 - **Diurnal Demand Curve:** `outputs/tables/temporal_demand_curve.csv` & `outputs/figures/temporal_demand_curve.png` (24-hour weekday vs weekend load profile)
 - **12-Scenario Sensitivity Analysis:** `outputs/tables/mcdm_sensitivity_results.csv` & `outputs/figures/mcdm_sensitivity_analysis.png` (TOPSIS-CRITIC stability across criteria perturbations)
+
+### Milestone 6: Full-Mode Citywide Pipeline Execution (308 Sites, 76.99 km²)
+To run the full-mode citywide pipeline across Varanasi's complete municipal extent:
+```bash
+# 1. Build full decision matrix (308 sites x 12 columns)
+python -c "from src.gis.build_decision_matrix import build_decision_matrix; build_decision_matrix(mode='full')"
+
+# 2. Run full MCDM ranking (all 4 combinations on 308 sites)
+python -c "from src.mcdm.pipeline import run_mcdm_pipeline; run_mcdm_pipeline(decision_matrix_path='data/processed/gis/decision_matrix_full.csv', output_table_path='outputs/tables/mcdm_rankings_full.csv')"
+
+# 3. Run full-scale 12-scenario sensitivity analysis
+python -c "import pandas as pd; from src.integration.sensitivity_analysis import run_mcdm_criteria_sensitivity, generate_mcdm_sensitivity_figure; df = pd.read_csv('data/processed/gis/decision_matrix_full.csv'); cols = [c for c in df.columns if c not in ['site_id', 'latitude', 'longitude']]; types = ['benefit', 'cost', 'benefit', 'benefit', 'benefit', 'benefit', 'benefit', 'benefit', 'benefit']; s = run_mcdm_criteria_sensitivity(df[cols], types, output_table_path='outputs/tables/mcdm_sensitivity_results_full.csv'); generate_mcdm_sensitivity_figure(s, 'outputs/figures/mcdm_sensitivity_analysis_full.png')"
+```
+Full-Mode Deliverables:
+- **Full Decision Matrix:** `data/processed/gis/decision_matrix_full.csv` (308 sites $\times 12$ columns)
+- **Full MCDM Rankings:** `outputs/tables/mcdm_rankings_full.csv` (Top-5: `SITE_195`, `SITE_217`, `SITE_196`, `SITE_218`, `SITE_194`)
+- **Full Sensitivity Analysis:** `outputs/tables/mcdm_sensitivity_results_full.csv` & `outputs/figures/mcdm_sensitivity_analysis_full.png`
+- **Sample vs. Full Comparative Report:** `outputs/reports/sample_vs_full_comparison.md`
 
 ---
 

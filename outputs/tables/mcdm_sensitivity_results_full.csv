@@ -1,0 +1,13 @@
+scenario_id,description,perturbed_criterion,spearman_rho,kendall_tau,top5_overlap_pct,max_rank_shift
+S01,+20% on C1_Major_Roads,C1_Major_Roads,0.9997,0.9886,100.0,15
+S02,+20% on C5_Competitor_EVCS,C5_Competitor_EVCS,1.0,1.0,100.0,0
+S03,+20% on C6_POI_Schools,C6_POI_Schools,0.9998,0.9919,100.0,8
+S04,+20% on C6_POI_Shopping_Malls,C6_POI_Shopping_Malls,0.9998,0.9915,100.0,6
+S05,+20% on C6_POI_Restaurants,C6_POI_Restaurants,0.9968,0.9638,100.0,28
+S06,+20% on C6_POI_Hospitals,C6_POI_Hospitals,1.0,1.0,100.0,0
+S07,+20% on C6_POI_Theatres,C6_POI_Theatres,0.9973,0.9688,100.0,37
+S08,+20% on C6_POI_Bus_Stops,C6_POI_Bus_Stops,0.9958,0.9554,100.0,35
+S09,+20% on C6_POI_Petrol_Bunks,C6_POI_Petrol_Bunks,0.9977,0.9693,100.0,27
+S10,Equal weights (1/N baseline),ALL_EQUAL,0.9953,0.948,100.0,31
+S11,Dominant Major Roads (50% weight),C1_Major_Roads_50PCT,0.7763,0.6265,80.0,203
+S12,Dominant Shopping Malls (50% weight),C6_POI_Shopping_Malls_50PCT,0.8363,0.664,100.0,165

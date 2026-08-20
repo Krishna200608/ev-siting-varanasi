@@ -47,6 +47,21 @@ This document is the **authoritative reference** for confirmed data sources, res
   2. **Operational Temporal Intelligence (*When* Demand Occurs):** The transferable ML demand model is evaluated as a standalone 24-hour diurnal profile (`outputs/tables/temporal_demand_curve.csv` and `outputs/figures/temporal_demand_curve.png`), informing operational scheduling, tariff structures, and transformer capacity at selected sites.
   3. **RQ3 Resolution:** Formally documents that within available non-localized telemetry, ML demand models provide operational timing rather than spatial site differentiation.
 
+### AD-9: Milestone 6 Full-Mode Citywide Execution (Boundary Provenance, Candidate Count & Mesh Limitations)
+- **Boundary Investigation & Provenance:**
+  - **OSM & Wikidata Search Outcome:** Thorough querying of OSM Nominatim, Overpass, and Wikidata SPARQL confirmed that OpenStreetMap and Wikidata lack an `admin_level=8` boundary relation for Varanasi Nagar Nigam (OSM only contains a `place=city` point node `node/287687798`). OSM `admin_level=5` (`relation/1959916`, $1,532.2\text{ km}^2$) and `admin_level=6` (`relation/10037380`, $844.7\text{ km}^2$) cover the entire rural district and sub-district tehsils (>85% agricultural farmland).
+  - **Boundary Classification:** Labelled strictly and honestly as an **"approximated boundary, manually constructed from named urban landmarks, not a verified administrative polygon"**. Conforms to the published 90-ward VMC reference (~82.1 km²), bounded by the Ganga River crescent (East), BHU Campus / Samne Ghat (South), Manduadih / BLW (South-West), Cantt / Lahartara (West), Shivpur / Tarna (North-West), and Sarnath approach (North-East).
+  - **Confirmed Geometry:** Area = **$76.99\text{ km}^2$**, generating **308 candidate sites** at 500m spacing strictly point-in-polygon clipped (saved to `data/raw/gis/varanasi_vmc_boundary.geojson`).
+- **Google Places Multi-Tile Mesh & Saturation Limitations:**
+  - **Cap Verification:** Empirical testing on Godowlia ($r=2,500\text{m}$ and $r=1,000\text{m}$) confirmed that 5 of 7 POI categories hit Google's hard 20-result limit per `searchNearby` call.
+  - **Mesh Architecture:** Deployed a 30-tile mesh (25 primary tiles $r=1,800\text{m}$ on a $5 \times 5$ grid + 5 nested dense-core tiles $r=800\text{m}$ in the Godowlia–Dashashwamedh–Chowk corridor) with `place_id` deduplication and incremental disk caching (`data/raw/gis/full_run_cache/`).
+  - **Documented Limitation:** While the 30-tile mesh substantially mitigates single-tile truncation (yielding 230–450+ unique POIs per category across the city), individual tiles in the extreme-density historic core remain subject to residual undercounting.
+- **Citywide Results:**
+  - **Decision Matrix:** `data/processed/gis/decision_matrix_full.csv` (308 sites $\times 12$ columns).
+  - **Rankings:** `outputs/tables/mcdm_rankings_full.csv` (Top-5: `SITE_195` Godowlia, `SITE_217` Dashashwamedh, `SITE_196` Godowlia North, `SITE_218` Vishwanath Corridor, `SITE_194` Sonarpura).
+  - **Sensitivity Analysis:** `outputs/tables/mcdm_sensitivity_results_full.csv` & `outputs/figures/mcdm_sensitivity_analysis_full.png` (100% Top-5 overlap across S01–S10; scale-dependent road sensitivity in S11 with $\rho=0.7763$).
+  - **Comparative Report:** `outputs/reports/sample_vs_full_comparison.md`.
+
 ---
 
 ## 2. Confirmed Data Sources & Implemented APIs
