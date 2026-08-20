@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "varanasi_vmc_boundary",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "name": "Varanasi_Municipal_Corporation_82km" }, "geometry": { "type": "Polygon", "coordinates": [ [ [ 82.99, 25.265 ], [ 83.008, 25.268 ], [ 83.015, 25.285 ], [ 83.018, 25.305 ], [ 83.032, 25.325 ], [ 83.045, 25.34 ], [ 83.03, 25.362 ], [ 83.0, 25.368 ], [ 82.97, 25.365 ], [ 82.952, 25.345 ], [ 82.948, 25.32 ], [ 82.952, 25.298 ], [ 82.96, 25.282 ], [ 82.975, 25.268 ], [ 82.99, 25.265 ] ] ] } }
+]
+}
