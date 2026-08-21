@@ -2,7 +2,7 @@
 
 **Author:** Decision Analytics Research Group  
 **Project:** Two-Stage EV Charging Station Siting Decision Support Framework (Varanasi, India)  
-**Methodological Milestone:** Milestone 7 — Equal-Scrutiny Multi-Zone Validation  
+**Methodological Milestone:** Milestone 7 & 7b — Equal-Scrutiny Multi-Zone Validation & Recalibration Mechanism  
 **Date:** August 2026  
 
 ---
@@ -91,30 +91,51 @@ The table below presents the real numeric shifts in criteria and scores across a
 
 ---
 
-## 5. Answers to the Core Methodological Questions
+## 5. Mathematical Recalibration Mechanism & Resolution of Anomalies
 
-### 1. Did POI density scores rise in the comparison zones?
-**Yes.** Once measured with equal 5-tile nested granularity:
-- Hospital density ($C_6\text{ Hospitals}$) jumped dramatically from baseline $1.00$ to **$7.63$ in Sigra**, **$5.82$ in Cantonment**, and **$5.31$ in Lanka/BHU**.
-- Educational density ($C_6\text{ Schools}$) rose by $+0.17$ to $+0.38$ across all comparison zones.
-- Commercial retail density ($C_6\text{ Shopping Malls}$) increased in Lanka ($4.63 \to 5.19$, $+0.56$).
+### 5.1 The Reclassification Mechanism (`points_to_kernel_density_raster`)
+An apparent anomaly in the raw data is that Godowlia's candidate scores in `C6_POI_Shopping_Malls` ($7.93 \to 6.87$) and `C6_POI_Restaurants` ($7.83 \to 6.91$) declined slightly between v1 and v2, despite **zero new tiles being added in Godowlia**.
 
-### 2. Did any comparison zone produce a candidate site in the Top-5 or Top-10?
-- **Top-5 Shortlist:** **No.** All 5 original Godowlia-corridor candidate sites (`SITE_195`, `SITE_217`, `SITE_218`, `SITE_196`, `SITE_194`) successfully defended their Top-5 positions. Not a single site from Sigra, Lanka, or Cantt was able to displace them.
-- **Top-10 Shortlist:** **Yes.** `SITE_153` (located on the northern Sigra/Englishia Line corridor at Lat: 25.3259, Lon: 82.9903) rose by **+9 positions** (from Rank 19 to **Rank 10**, score 0.6006), displacing peri-central site `SITE_197` (Chowk north).
+To explain this, inspect the exact mathematical reclassification implementation in `src/gis/build_decision_matrix.py` (lines 511–516):
 
-### 3. Definitive Scientific Conclusion: Artifact or Real?
-**The Godowlia corridor dominance is VALIDATED AS GENUINE, NOT AN ARTIFACT.**
+```python
+    # Reclassify continuous KDE density onto 1.0 to 9.0 scale
+    d_min, d_max = density.min(), density.max()
+    if d_max > d_min:
+        norm_density = 1.0 + 8.0 * ((density - d_min) / (d_max - d_min))
+    else:
+        norm_density = np.ones_like(density) * 5.0
+```
 
-The empirical evidence shows:
-1. **Multi-Criteria Agglomeration Primacy:** Even when other commercial nodes are given equal nested spatial measurement, Godowlia's exceptional co-location of high road connectivity ($C_1 \approx 8.8$), dense commercial retail ($C_6 \approx 6.9$), hyper-concentrated dining footfall ($C_6 \approx 6.9$), and transit access ensures its composite closeness coefficient ($C_i \approx 0.71–0.75$) remains $>0.14$ points higher than the best site in any other urban zone (Sigra's best: $0.6006$, Cantt's best: $0.5384$, Lanka's best: $0.5258$).
-2. **Shortlist Robustness:** The Top-5 candidate sites represent the absolute highest-priority physical deployment locations in Varanasi for capital allocation and infrastructure de-risking.
+1. **Citywide Global Scaling:** The $[1.0, 9.0]$ standardization is evaluated relative to $d_{\min}$ and $d_{\max}$ across the **entire bounding box continuous raster grid** ($76.99\text{ km}^2$). It is not normalized per zone or per tile.
+2. **The Mechanism of Godowlia's Score Shift:** In v1, Godowlia held the primary peak density for shopping malls and restaurants in the captured dataset. When Milestone 7 added hundreds of new verified POIs across Sigra, Lanka, and Cantt, the citywide continuous KDE density surface broadened, increasing the global denominator $(d_{\max} - d_{\min})$. Consequently, Godowlia's normalized score mathematically adjusted downwards from $\sim 7.9$ to $\sim 6.9$.
+3. **Implication:** Godowlia's local physical environment did not change; rather, the citywide relative measurement scale became more demanding and comprehensive as other commercial nodes were populated.
+
+### 5.2 Resolution of the Uniform Hospital Jump ($1.00 \to 5.32–7.63$)
+The `C6_POI_Hospitals` column exhibited a dramatic jump of roughly $+4$ to $+6.6$ across all four zones (including Godowlia). Detailed audit of the underlying raw cache files reveals the exact root cause:
+- **v1 Root Cause (Milestone 6):** In Milestone 6, Google Places API hit HTTP 429 quota exhaustion during the hospital query, leaving `full_run_cache/hospitals.json` with only **20 points** concentrated in a single south-eastern peripheral tile. Because this cluster lay far outside the candidate fishnet grid, the KDE density across all 308 candidate sites fell to near-zero ($<10^{-10}$), causing every site in the city to receive a flat default score of **$1.0000$ ($\text{std} = 0.0$)**. Consequently, the CRITIC algorithm assigned `C6_POI_Hospitals` a weight of **$0.0000$** in v1.
+- **v2 Resolution (Milestone 7):** In Milestone 7, the hospital layer was comprehensively populated across the city with **280 hospitals, medical colleges, clinics, and pharmacies** (including Sir Sunderlal Hospital at BHU, Cantt railway hospitals, and Sigra medical facilities).
+- **Mathematical Effect:** This restored `C6_POI_Hospitals` to a genuine continuous density surface ($\text{min} = 1.47, \text{mean} = 5.04, \text{max} = 8.95, \text{std} = 2.00$). CRITIC assigned this populated criterion an active objective weight of **$0.1311$**.
+- **Conclusion:** The hospital jump reflects the transition of `C6_POI_Hospitals` from a completely unpopulated, zero-variance dummy column ($1.0000$ flat) into a fully populated, highly active spatial criterion.
 
 ---
 
-## 6. Documented Residual Limitations
+## 6. Definitive Scientific Conclusion: Strengthened Proof of Godowlia's Primacy
+
+**The Godowlia corridor dominance is STRONGLY VALIDATED AS A GENUINE URBAN CONCENTRATION.**
+
+1. **Defense Against Fairer Competition:** Godowlia retained its #1 ranking and 100% Top-5 retention even after:
+   - Sigra, Lanka, and Cantt received identical 5-tile nested high-density measurement ($r=800\text{m}$).
+   - Citywide min-max rescaling calibrated Godowlia's normalized POI scores downwards.
+   - An entirely new criterion (`C6_POI_Hospitals`, $w = 0.1311$) was activated with peak scores favoring Sigra ($7.63$) and Cantt ($5.82$).
+2. **Multi-Criteria Synergy:** Despite Sigra winning on hospital density ($7.63$) and Cantt winning on transit access, Godowlia's unparalleled multi-criteria synergy—combining arterial road proximity ($C_1 \approx 8.8$), intense dining agglomeration ($C_6 \approx 6.9$), and dense retail footfall ($C_6 \approx 6.9$)—produced composite closeness coefficients ($C_i \ge 0.6736$) that no other zone could match (Sigra's best: $0.6006$, Cantt's best: $0.5384$, Lanka's best: $0.5258$).
+3. **Top-10 Realignment:** Equal measurement legitimately elevated **`SITE_153`** (Northern Sigra / Englishia Line) by **+9 positions** (Rank 19 $\to$ **Rank 10**, score 0.6006), proving that equal scrutiny captures genuine secondary commercial strength without dislodging the primary cluster.
+
+---
+
+## 7. Documented Residual Limitations
 
 While Milestone 7 resolves the confound among the city's 4 major commercial nodes (Godowlia, Sigra, Lanka, Cantt):
-- Only **4 urban zones total** have received high-density nested tile treatment ($r=800\text{m}$).
+- Only **4 urban zones total** (20 nested tiles total) have received high-density nested tile treatment ($r=800\text{m}$).
 - The peripheral and outer municipal sectors (Sunderpur West, Shivpur North, Rajghat East) remain evaluated on the baseline 25-tile grid ($r=1,800\text{m}$).
-- While sufficient for prioritizing central commercial fast-charging hubs, citywide fleet electrification across suburban depots would eventually require a fully uniform micro-mesh across all 90 wards.
+- In any future incremental expansion of the GIS layer, users must recognize that adding POIs to new suburban sectors will dynamically rescale the normalized scores of existing candidate sites via the citywide $(d_{\max} - d_{\min})$ continuous raster denominator.
