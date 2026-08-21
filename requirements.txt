@@ -19,6 +19,6 @@ requests>=2.31.0
 # Visualization & Reporting
 matplotlib>=3.8.0
 
-# Development, Notebooks & Testing
-jupyter>=1.0.0
+# Development & Testing
 pytest>=7.4.0
+
