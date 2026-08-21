@@ -9,7 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings, render_sidebar_logo, get_theme_colors
+from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings, render_sidebar_logo
 from dashboard.utils.mcdm_live import (
     get_default_critic_weights,
     compute_live_whatif_ranking,
@@ -19,8 +19,6 @@ from dashboard.utils.mcdm_live import (
 
 st.set_page_config(page_title="What-If Explorer — EV Siting Varanasi", page_icon=":material/tune:", layout="wide")
 render_sidebar_logo()
-theme_colors = get_theme_colors()
-
 
 st.title(":material/tune: Live What-If Criteria Weight Explorer")
 st.markdown(
@@ -230,6 +228,4 @@ fig.add_shape(
     type="line", line=dict(dash="dash", color="gray"),
     x0=1, y0=1, x1=308, y1=308
 )
-fig.update_layout(template=theme_colors["plotly_template"])
 st.plotly_chart(fig, use_container_width=True)
-

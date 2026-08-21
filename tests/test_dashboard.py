@@ -119,30 +119,3 @@ def test_whatif_default_weights_exact_match_stored_baseline():
 
     # Assert all rank shifts are exactly 0
     assert (live_sorted["rank_shift"] == 0).all()
-
-
-def test_theme_tokens_and_state():
-    """Verify theme engine returns valid color tokens and defaults."""
-    from dashboard.utils.data_loader import init_theme_state, get_theme_colors
-
-    # Test default initialization
-    theme = init_theme_state()
-    assert theme in ["dark", "light"]
-
-    # Test dark mode tokens
-    import streamlit as st
-    st.session_state["theme"] = "dark"
-    dark_colors = get_theme_colors()
-    assert dark_colors["theme"] == "dark"
-    assert dark_colors["plotly_template"] == "plotly_dark"
-    assert dark_colors["folium_tiles"] == "CartoDB dark_matter"
-    assert dark_colors["bg_color"].startswith("#")
-
-    # Test light mode tokens
-    st.session_state["theme"] = "light"
-    light_colors = get_theme_colors()
-    assert light_colors["theme"] == "light"
-    assert light_colors["plotly_template"] == "plotly_white"
-    assert light_colors["folium_tiles"] == "CartoDB positron"
-    assert light_colors["bg_color"].startswith("#")
-

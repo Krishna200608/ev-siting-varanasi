@@ -11,13 +11,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_sensitivity_results, get_figure_path, render_sidebar_logo, get_theme_colors
+from dashboard.utils.data_loader import load_sensitivity_results, get_figure_path, render_sidebar_logo
 
 
 st.set_page_config(page_title="Sensitivity Analysis — EV Siting Varanasi", page_icon=":material/query_stats:", layout="wide")
 render_sidebar_logo()
-theme_colors = get_theme_colors()
-
 
 st.title(":material/query_stats: Multi-Scenario Sensitivity & Scale-Dependent Dynamics")
 st.markdown(
@@ -87,10 +85,8 @@ with tab_v2:
             yaxis_range=[0.70, 1.05],
             xaxis=dict(type="category", tickmode="linear", dtick=1),
             margin=dict(l=20, r=20, t=40, b=20),
-            template=theme_colors["plotly_template"],
         )
         st.plotly_chart(fig_bar, use_container_width=True)
-
 
 with tab_v1:
     sens_v1 = load_sensitivity_results("full_v1")
