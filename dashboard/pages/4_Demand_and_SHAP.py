@@ -11,11 +11,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_temporal_curve, get_figure_path, render_sidebar_logo
+from dashboard.utils.data_loader import load_temporal_curve, get_figure_path, render_sidebar_logo, get_theme_colors
 
 
 st.set_page_config(page_title="Demand & SHAP — EV Siting Varanasi", page_icon=":material/show_chart:", layout="wide")
 render_sidebar_logo()
+theme_colors = get_theme_colors()
+
 
 st.title(":material/show_chart: Operational Demand Profiling & SHAP Explainability")
 st.markdown(
@@ -63,8 +65,10 @@ with col_fig:
         xaxis=dict(tickmode="linear", tick0=0, dtick=2),
         hovermode="x unified",
         margin=dict(l=20, r=20, t=50, b=20),
+        template=theme_colors["plotly_template"],
     )
     st.plotly_chart(fig_demand, use_container_width=True)
+
 
 with col_tbl:
     st.markdown("**Diurnal Summary Metrics:**")

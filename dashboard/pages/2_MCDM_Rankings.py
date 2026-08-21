@@ -10,11 +10,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_mcdm_rankings, render_sidebar_logo
+from dashboard.utils.data_loader import load_mcdm_rankings, render_sidebar_logo, get_theme_colors
 
 
 st.set_page_config(page_title="MCDM Rankings — EV Siting Varanasi", page_icon=":material/leaderboard:", layout="wide")
 render_sidebar_logo()
+theme_colors = get_theme_colors()
+
 
 st.title(":material/leaderboard: Multi-Criteria Siting Rankings & Method Comparison")
 st.markdown(
@@ -150,5 +152,7 @@ fig = px.imshow(
 fig.update_layout(
     font=dict(size=13),
     margin=dict(l=40, r=40, t=50, b=40),
+    template=theme_colors["plotly_template"],
 )
+
 st.plotly_chart(fig, use_container_width=True)

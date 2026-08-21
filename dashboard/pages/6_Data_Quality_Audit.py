@@ -9,11 +9,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_data_quality_audit_table, render_sidebar_logo
+from dashboard.utils.data_loader import load_data_quality_audit_table, render_sidebar_logo, get_theme_colors
 
 
 st.set_page_config(page_title="Data Quality Audit — EV Siting Varanasi", page_icon=":material/verified_user:", layout="wide")
 render_sidebar_logo()
+theme_colors = get_theme_colors()
 
 st.title(":material/verified_user: Systematic Data Quality Audit & Permanent Safeguards")
 st.markdown(
@@ -29,10 +30,11 @@ audit_df = load_data_quality_audit_table()
 
 def highlight_status(val: str) -> str:
     if val == "HEALTHY":
-        return "background-color: #c8e6c9; color: #1b5e20; font-weight: bold;"
+        return f"background-color: {theme_colors['healthy_bg']}; color: {theme_colors['healthy_text']}; font-weight: bold;"
     elif val == "DEGENERATE":
-        return "background-color: #ffcdd2; color: #b71c1c; font-weight: bold;"
+        return f"background-color: {theme_colors['degenerate_bg']}; color: {theme_colors['degenerate_text']}; font-weight: bold;"
     return ""
+
 
 # Apply formatting using map (compatible with pandas 2.1+ / 3.0+)
 st.dataframe(

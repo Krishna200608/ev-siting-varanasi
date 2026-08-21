@@ -11,11 +11,13 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings, render_sidebar_logo
+from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings, render_sidebar_logo, get_theme_colors
 
 
 st.set_page_config(page_title="Site Map — EV Siting Varanasi", page_icon=":material/map:", layout="wide")
 render_sidebar_logo()
+theme_colors = get_theme_colors()
+
 
 st.title(":material/map: Interactive Spatial Candidate Site Map")
 st.markdown(
@@ -63,10 +65,14 @@ def get_marker_color(score: float) -> str:
         return "#d73027"  # Red
 
 
-# Initialize Folium Map centered on Central Varanasi
+# Initialize Folium Map centered on Central Varanasi with theme-synchronized tiles
 map_center = [25.3120, 82.9950]
-m = folium.Map(location=map_center, zoom_start=13, tiles="CartoDB positron")
+m = folium.Map(location=map_center, zoom_start=13, tiles=theme_colors["folium_tiles"])
+folium.TileLayer("CartoDB positron", name="Light Map (CartoDB Positron)").add_to(m)
+folium.TileLayer("CartoDB dark_matter", name="Dark Map (CartoDB Dark Matter)").add_to(m)
 Fullscreen(position="topright").add_to(m)
+folium.LayerControl(position="topright").add_to(m)
+
 
 # Add municipal bounds approx outline context
 boundary_coords = [
