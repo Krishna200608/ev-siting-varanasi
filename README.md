@@ -168,11 +168,29 @@ Equal-Scrutiny Deliverables:
 - **Sensitivity Analysis (v2):** `outputs/tables/mcdm_sensitivity_results_full_v2.csv` & `outputs/figures/mcdm_sensitivity_analysis_full_v2.png`
 - **Validation Report:** `outputs/reports/equal_scrutiny_validation.md` (Definitive confirmation that Godowlia primacy is a genuine urban concentration)
 
+### Milestone 8: Interactive Streamlit Showcase & What-If Dashboard
+An interactive, dependency-light web dashboard designed for viva presentations, stakeholder demonstrations, and cloud deployment:
+
+```bash
+# Launch the dashboard locally from repository root
+streamlit run dashboard/app.py
+```
+
+#### Dashboard Architecture & Page Guide:
+- **`app.py` (Home & Overview):** Executive summary, two-stage framework structure, and headline urban metrics (308 candidate alternatives, 0 existing public EV fast-chargers, Top site score).
+- **`1_Site_Map.py` (Interactive Site Map):** Full-screen Folium map with dynamic suitability color coding, Top-5 distinctive markers, click-to-view criteria popups, and a v1 vs. v2 spatial scrutiny toggle.
+- **`2_MCDM_Rankings.py` (MCDM Rankings Table):** Sortable and filterable table across all 4 MCDM combinations (TOPSIS/WASPAS $\times$ CRITIC/Entropy) with urban zone filters and CSV export.
+- **`3_Whatif_Weight_Explorer.py` (Live What-If Explorer):** Interactive sensitivity tool with 9 criteria sliders (defaulted to empirical CRITIC weights) performing sub-second live TOPSIS re-ranking and rank-shift scatter analytics.
+- **`4_Demand_and_SHAP.py` (Demand & SHAP):** 24-hour diurnal energy demand curves (weekday vs. weekend), SHAP feature attribution plots, and methodological synthesis on operational timing (RQ3).
+- **`5_Sensitivity_Analysis.py` (Sensitivity Analysis):** 12-scenario criteria weight perturbation analysis, radar/line plots, and scale-dependent road proximity dynamics ($S_{11}$).
+- **`6_Data_Quality_Audit.py` (Data Quality Audit):** Systematic 9-criteria $\times$ 2-version audit table, root-cause diagnostics on $C_5$ and $C_6$, and automated pipeline safeguard documentation.
+- **`7_Project_Journey.py` (Project Journey):** Grounded chronological chronicle of key architectural decisions (AD-1 through AD-11) documenting problems tried, empirical findings, and verified solutions.
+
 ---
 
 ## 5. Running Tests
 
-To run the complete test suite (23 tests covering GIS, MCDM, ML, and Integration with zero live network calls):
+To run the complete automated test suite (32 unit and integration tests covering GIS, MCDM, ML, Sensitivity, Data Quality Safeguards, and Dashboard components with zero live network calls):
 ```bash
 pytest tests/ -v
 ```
@@ -182,5 +200,7 @@ pytest tests/ -v
 ## 6. Documentation & Key Links
 
 - **Implementation Roadmap:** See [docs/ROADMAP.md](docs/ROADMAP.md) for milestone status.
-- **Data Sourcing & Pending Decisions:** Consult [docs/PENDING_DECISIONS.md](docs/PENDING_DECISIONS.md) for authoritative data source statuses and architectural decisions.
+- **Data Sourcing & Pending Decisions:** Consult [docs/PENDING_DECISIONS.md](docs/PENDING_DECISIONS.md) for authoritative data source statuses and architectural decisions (AD-1 through AD-11).
 - **Standing Agent Rules:** Review [AGENTS.md](AGENTS.md) for coding conventions and policies.
+- **Public GitHub Repository:** [https://github.com/Krishna200608/ev-siting-varanasi](https://github.com/Krishna200608/ev-siting-varanasi)
+

@@ -74,5 +74,17 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
   - **Top-10 Influx:** `SITE_153` (Northern Sigra / Englishia Line) rose from Rank 19 $\to$ **Rank 10** (Score: 0.6006).
   - **Versioned Deliverables:** `data/processed/gis/decision_matrix_full_v2.csv`, `outputs/tables/mcdm_rankings_full_v2.csv`, `outputs/tables/mcdm_sensitivity_results_full_v2.csv`, `outputs/figures/mcdm_sensitivity_analysis_full_v2.png`, and `outputs/reports/equal_scrutiny_validation.md`.
 
+---
 
-
+## Milestone 8 — Streamlit Showcase & What-If Dashboard (Completed)
+- **Dependency-Light Architecture (AD-11):** Built a multi-page interactive Streamlit dashboard (`dashboard/app.py` + 7 content pages) with zero runtime dependencies on heavy GIS (`geopandas`, `rasterio`) or ML (`xgboost`, `shap`) libraries.
+- **Canonical Deployment Requirements:** Formulated `dashboard/requirements.txt` as the single authoritative dependency file for Streamlit Community Cloud (`streamlit`, `pandas`, `numpy`, `plotly`, `folium`, `streamlit-folium`).
+- **Interactive Multi-Page Capabilities:**
+  1. **Site Map (`1_Site_Map.py`):** Interactive Folium map with v1/v2 measurement toggles and Top-5 highlighted star markers.
+  2. **MCDM Rankings (`2_MCDM_Rankings.py`):** Searchable, filterable 4-method comparison table with urban zone segmentation.
+  3. **What-If Weight Explorer (`3_Whatif_Weight_Explorer.py`):** Live sub-second TOPSIS re-ranker with 9 criteria sliders and rank-shift scatter analytics (verified to exactly reproduce baseline rankings under default CRITIC weights; `C5_Competitor_EVCS` strictly evaluated as cost).
+  4. **Demand & SHAP (`4_Demand_and_SHAP.py`):** 24-hour diurnal load profiles, SHAP feature importance curves, and RQ3 operational context.
+  5. **Sensitivity Analysis (`5_Sensitivity_Analysis.py`):** 12-scenario weight perturbation tables, figures, and scale-dependent road sensitivity callouts ($S_{11}$).
+  6. **Data Quality Audit (`6_Data_Quality_Audit.py`):** $9 \times 2$ audit matrix and permanent pipeline safeguard documentation.
+  7. **Project Journey (`7_Project_Journey.py`):** Grounded narrative of architectural decisions AD-1 through AD-11.
+- **Comprehensive Unit Testing:** Created `tests/test_dashboard.py` (32 total passing tests across the repository).

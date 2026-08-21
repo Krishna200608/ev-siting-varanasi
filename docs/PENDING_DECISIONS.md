@@ -72,15 +72,18 @@ This document is the **authoritative reference** for confirmed data sources, res
 - **Empirical Outcome:**
   - **Godowlia Dominance Validated as Genuine:** All 5 original Top-5 candidate sites (`SITE_195`, `SITE_217`, `SITE_218`, `SITE_196`, `SITE_194`) successfully defended their Top-5 positions under equal scrutiny, even against newly activated hospital competition and downwards rescaling.
   - **Top-10 Influx:** `SITE_153` (Northern Sigra / Englishia Line, Lat: 25.3259, Lon: 82.9903) climbed from Rank 19 $\to$ **Rank 10** (Score: 0.6006), demonstrating that equal measurement elevated legitimate high-density commercial nodes into the top tier while confirming Godowlia's composite primacy ($>0.71$).
-- **Residual Documented Limitation:**
-  - Only **4 urban zones total** (Godowlia, Sigra, Lanka, Cantt; 20 nested tiles total) have received high-density treatment ($r=800\text{m}$). The remaining peripheral and suburban municipal sectors remain evaluated on the baseline 25-tile grid ($r=1,800\text{m}$).
+### AD-11: Streamlit Showcase Dashboard & Dependency-Light Deployment Architecture (Milestone 8)
+- **Problem Statement:** The project requires a multi-page interactive dashboard for viva demonstration and public deployment on Streamlit Community Cloud. Heavy geospatial/ML libraries (`geopandas`, `rasterio`, `xgboost`, `shap`, `gdal`) frequently encounter C-extension compilation and GDAL binary resolution failures in headless cloud environments.
+- **Architectural Decisions:**
+  1. **Dependency-Light Runtime Design:** The dashboard (`dashboard/`) operates strictly as a consumer of pre-computed static artifacts (CSVs and PNG figures), avoiding all runtime imports of `geopandas`, `rasterio`, `xgboost`, or `shap`.
+  2. **Live What-If Re-Ranking:** The interactive criteria weight explorer imports only pure mathematical routines (`compute_topsis_ranking()`, `compute_critic_weights()`) from `src/mcdm/` (pure NumPy/Pandas), enabling sub-second live re-ranking with zero GIS dependencies.
+  3. **Strict Criteria Orientation:** `C5_Competitor_EVCS` is explicitly passed as a `cost` criterion matching `config/criteria.yaml` and AD-2. Default CRITIC weights are verified to produce an exact mathematical reproduction of `mcdm_rankings_full_v2.csv`.
+  4. **Single Canonical Requirements File:** Per Streamlit Community Cloud resolution rules, `dashboard/requirements.txt` is maintained as the single, canonical dependency specification (`streamlit`, `pandas`, `numpy`, `plotly`, `folium`, `streamlit-folium`), preventing dual-source drift.
 - **Deliverables:**
-  - Decision Matrix: `data/processed/gis/decision_matrix_full_v2.csv`
-  - Rankings: `outputs/tables/mcdm_rankings_full_v2.csv`
-  - Sensitivity Analysis: `outputs/tables/mcdm_sensitivity_results_full_v2.csv` & `outputs/figures/mcdm_sensitivity_analysis_full_v2.png`
-  - Comprehensive Report: `outputs/reports/equal_scrutiny_validation.md`
-  - Quality Safeguard: `src/gis/build_decision_matrix.py::validate_decision_matrix_quality()`
-  - Unit Tests: `tests/test_data_quality.py`
+  - Dashboard Application: `dashboard/app.py` and 7 content pages in `dashboard/pages/`
+  - Lightweight Requirements: `dashboard/requirements.txt`
+  - Pure Live Wrapper: `dashboard/utils/mcdm_live.py` and `dashboard/utils/data_loader.py`
+  - Unit Tests: `tests/test_dashboard.py` (32 tests passing)
 
 ---
 
