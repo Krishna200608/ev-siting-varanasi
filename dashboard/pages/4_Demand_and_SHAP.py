@@ -14,9 +14,9 @@ if str(REPO_ROOT) not in sys.path:
 from dashboard.utils.data_loader import load_temporal_curve, get_figure_path
 
 
-st.set_page_config(page_title="Demand & SHAP — EV Siting Varanasi", page_icon="📈", layout="wide")
+st.set_page_config(page_title="Demand & SHAP — EV Siting Varanasi", page_icon=":material/show_chart:", layout="wide")
 
-st.title("📈 Operational Demand Profiling & SHAP Explainability")
+st.title(":material/show_chart: Operational Demand Profiling & SHAP Explainability")
 st.markdown(
     "Stage 2 of the decision framework leverages empirical machine learning trained on **real EV charging session telemetry** "
     "(Caltech / JPL ACN-Data, $N=30,000+$ transactions) to model charging behavior, extract feature importance via SHAP, "
@@ -26,7 +26,7 @@ st.markdown(
 st.markdown("---")
 
 # Section 1: Diurnal Demand Profiling
-st.subheader("⏰ 24-Hour Diurnal Energy Demand Profile")
+st.subheader(":material/schedule: 24-Hour Diurnal Energy Demand Profile")
 st.markdown(
     "Projected expected charging demand (kWh/session) across the 24 hours of the day for **Weekdays vs. Weekends**. "
     "This profile provides grid operators and station developers with operational intelligence on *when* peak transformer "
@@ -96,7 +96,7 @@ with col_tbl:
 st.markdown("---")
 
 # Section 2: SHAP Feature Explainability
-st.subheader("🔍 SHAP (SHapley Additive exPlanations) Feature Importance")
+st.subheader(":material/search: SHAP (SHapley Additive exPlanations) Feature Importance")
 
 tab_full, tab_trans = st.tabs([
     "1. Full-Feature Model (General EV Behavior, R² ≈ 0.51)",
@@ -154,7 +154,7 @@ with tab_trans:
 st.markdown("---")
 
 # Section 3: Methodological Rationale (AD-8 / RQ3)
-st.subheader("💡 Methodological Resolution of Research Question 3 (RQ3)")
+st.subheader(":material/psychology: Methodological Resolution of Research Question 3 (RQ3)")
 st.info(
     """
     **Why ML Demand Informs *Operational Timing* Rather Than *Spatial Site Selection*:**
@@ -165,5 +165,6 @@ st.info(
       would artificially generate spatial differentiation from invented numbers, violating scientific integrity.
     * **The Two-Stage Solution:** Spatial site ranking (*Where*) is governed strictly by the Stage 1 GIS-MCDM TOPSIS framework, 
       while Machine Learning (*When*) governs operational load scheduling, dynamic tariffs, and grid transformer sizing at prioritized sites.
-    """
+    """,
+    icon=":material/lightbulb:",
 )

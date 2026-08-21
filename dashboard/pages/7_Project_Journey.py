@@ -2,9 +2,9 @@
 
 import streamlit as st
 
-st.set_page_config(page_title="Project Journey — EV Siting Varanasi", page_icon="📖", layout="wide")
+st.set_page_config(page_title="Project Journey — EV Siting Varanasi", page_icon=":material/menu_book:", layout="wide")
 
-st.title("📖 Project Methodology Journey & Key Decisions")
+st.title(":material/menu_book: Project Methodology Journey & Key Decisions")
 st.markdown(
     "A transparent, chronological chronicle of the core scientific, architectural, and data engineering decisions "
     "governing the evolution of this research project. Each decision documents: **What We Tried → What We Found → What We Did Instead**."
@@ -13,7 +13,7 @@ st.markdown(
 st.markdown("---")
 
 # AD-1
-with st.expander("📍 AD-1: Metric UTM Zone 44N Fishnet Grid vs. Voronoi Tessellation", expanded=True):
+with st.expander(":material/grid_on: AD-1: Metric UTM Zone 44N Fishnet Grid vs. Voronoi Tessellation", expanded=True):
     st.markdown(
         """
         * **What We Tried:** Considered generating candidate EVCS siting locations via centroid Voronoi tessellation around existing amenities vs. regular spatial fishnets.
@@ -23,7 +23,7 @@ with st.expander("📍 AD-1: Metric UTM Zone 44N Fishnet Grid vs. Voronoi Tessel
     )
 
 # AD-4
-with st.expander("🛑 AD-4: Rejection of Synthetic Kaggle EV Datasets", expanded=True):
+with st.expander(":material/block: AD-4: Rejection of Synthetic Kaggle EV Datasets", expanded=True):
     st.markdown(
         """
         * **What We Tried:** Investigated public Kaggle datasets purporting to provide EV charging station demand and vehicle features.
@@ -33,7 +33,7 @@ with st.expander("🛑 AD-4: Rejection of Synthetic Kaggle EV Datasets", expande
     )
 
 # AD-6
-with st.expander("🛑 AD-6: Rejection of Fabricated Dwell-Time Proxies", expanded=True):
+with st.expander(":material/block: AD-6: Rejection of Fabricated Dwell-Time Proxies", expanded=True):
     st.markdown(
         """
         * **What We Tried:** Explored creating an `estimate_proxy_dwell_time()` function to assign assumed session durations (e.g. 3.5h for malls, 0.75h for fuel bunks) to simulate site-specific ML demand in Varanasi.
@@ -43,7 +43,7 @@ with st.expander("🛑 AD-6: Rejection of Fabricated Dwell-Time Proxies", expand
     )
 
 # AD-8
-with st.expander("💡 AD-8: Rejection of Mathematically Inert Compositing (Resolution of RQ3)", expanded=True):
+with st.expander(":material/lightbulb: AD-8: Rejection of Mathematically Inert Compositing (Resolution of RQ3)", expanded=True):
     st.markdown(
         """
         * **What We Tried:** Attempted a composite demand score multiplying candidate GIS footfall by transferable ML temporal predictions: `S_i = F_i × W_temporal`.
@@ -53,7 +53,7 @@ with st.expander("💡 AD-8: Rejection of Mathematically Inert Compositing (Reso
     )
 
 # AD-9
-with st.expander("🗺️ AD-9: Bounding Polygon Sourcing & Administrative Conformance", expanded=True):
+with st.expander(":material/polyline: AD-9: Bounding Polygon Sourcing & Administrative Conformance", expanded=True):
     st.markdown(
         """
         * **What We Tried:** Evaluated OSM administrative boundary queries vs. manual bounding boxes for Varanasi Nagar Nigam.
@@ -63,7 +63,7 @@ with st.expander("🗺️ AD-9: Bounding Polygon Sourcing & Administrative Confo
     )
 
 # AD-10
-with st.expander("⚖️ AD-10: Equal-Scrutiny Multi-Zone Validation & Recalibration Insight", expanded=True):
+with st.expander(":material/balance: AD-10: Equal-Scrutiny Multi-Zone Validation & Recalibration Insight", expanded=True):
     st.markdown(
         """
         * **What We Tried:** Investigated whether Godowlia's dominance in Milestone 6 was an artifact of receiving 5 extra nested Google Places tiles (radius 800m) while other commercial zones received only coarse grid coverage.
@@ -73,7 +73,7 @@ with st.expander("⚖️ AD-10: Equal-Scrutiny Multi-Zone Validation & Recalibra
     )
 
 # AD-11
-with st.expander("🖥️ AD-11: Dependency-Light Dashboard Architecture for Cloud Deployment", expanded=True):
+with st.expander(":material/cloud_done: AD-11: Dependency-Light Dashboard Architecture for Cloud Deployment", expanded=True):
     st.markdown(
         """
         * **What We Tried:** Evaluated deploying a unified Streamlit dashboard on Streamlit Community Cloud with local viva demo support.

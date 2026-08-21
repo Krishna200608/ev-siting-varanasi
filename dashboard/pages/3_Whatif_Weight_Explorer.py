@@ -17,9 +17,9 @@ from dashboard.utils.mcdm_live import (
 )
 
 
-st.set_page_config(page_title="What-If Explorer — EV Siting Varanasi", page_icon="🎛️", layout="wide")
+st.set_page_config(page_title="What-If Explorer — EV Siting Varanasi", page_icon=":material/tune:", layout="wide")
 
-st.title("🎛️ Live What-If Criteria Weight Explorer")
+st.title(":material/tune: Live What-If Criteria Weight Explorer")
 st.markdown(
     "Dynamically modify the importance weight of each spatial criterion and observe **real-time recalculations "
     "of the TOPSIS site suitability ranking** across all 308 candidate alternatives. "
@@ -34,27 +34,27 @@ base_rankings_v2 = load_mcdm_rankings("v2")
 default_critic = get_default_critic_weights(dm_v2)
 
 # Weight Preset Selector
-st.subheader("⚡ Quick Weight Presets")
+st.subheader(":material/flash_on: Quick Weight Presets")
 preset_cols = st.columns(5)
 
 with preset_cols[0]:
-    if st.button("📊 CRITIC Default (Empirical)", use_container_width=True):
+    if st.button("CRITIC Default (Empirical)", icon=":material/analytics:", use_container_width=True):
         st.session_state["weights"] = default_critic.copy()
 
 with preset_cols[1]:
-    if st.button("⚖️ Equal Weights (1/9)", use_container_width=True):
+    if st.button("Equal Weights (1/9)", icon=":material/balance:", use_container_width=True):
         st.session_state["weights"] = {k: 1.0 / 9.0 for k in default_critic.keys()}
 
 with preset_cols[2]:
-    if st.button("🛣️ Road Arterial Focus (50% Road)", use_container_width=True):
+    if st.button("Road Arterial Focus (50%)", icon=":material/alt_route:", use_container_width=True):
         st.session_state["weights"] = {k: 0.50 if k == "C1_Major_Roads" else 0.50 / 8.0 for k in default_critic.keys()}
 
 with preset_cols[3]:
-    if st.button("🛍️ Retail Mall Focus (50% Malls)", use_container_width=True):
+    if st.button("Retail Mall Focus (50%)", icon=":material/shopping_cart:", use_container_width=True):
         st.session_state["weights"] = {k: 0.50 if k == "C6_POI_Shopping_Malls" else 0.50 / 8.0 for k in default_critic.keys()}
 
 with preset_cols[4]:
-    if st.button("🏥 Healthcare Focus (50% Hospital)", use_container_width=True):
+    if st.button("Healthcare Focus (50%)", icon=":material/local_hospital:", use_container_width=True):
         st.session_state["weights"] = {k: 0.50 if k == "C6_POI_Hospitals" else 0.50 / 8.0 for k in default_critic.keys()}
 
 # Initialize session state if not set
@@ -64,7 +64,7 @@ if "weights" not in st.session_state:
 st.markdown("---")
 
 # Sliders Section
-st.subheader("🎚️ Custom Criteria Weight Adjusters")
+st.subheader(":material/tune: Custom Criteria Weight Adjusters")
 st.caption(
     "Adjust raw slider values (weights are automatically normalized to sum to 1.0 before running TOPSIS). "
     "Note: Competitor EVCS is strictly evaluated as a **cost** criterion per project criteria standards."
@@ -76,64 +76,64 @@ criteria_keys = list(default_critic.keys())
 slider_weights = {}
 
 with col_s1:
-    st.markdown("**Accessibility & Competition**")
+    st.markdown("**:material/alt_route: Accessibility & Competition**")
     slider_weights["C1_Major_Roads"] = st.slider(
-        "🛣️ Major Roads (C1) [Benefit]",
+        "Major Roads (C1) [Benefit]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C1_Major_Roads"]),
         step=0.01,
     )
     slider_weights["C5_Competitor_EVCS"] = st.slider(
-        "⚡ Competitor EVCS (C5) [Cost]",
+        "Competitor EVCS (C5) [Cost]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C5_Competitor_EVCS"]),
         step=0.01,
         help="0 registered stations exist in Varanasi; weight scales competition avoidance.",
     )
     slider_weights["C6_POI_Schools"] = st.slider(
-        "🏫 Schools & Universities (C6) [Benefit]",
+        "Schools & Universities (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C6_POI_Schools"]),
         step=0.01,
     )
 
 with col_s2:
-    st.markdown("**Commercial & Dining Density**")
+    st.markdown("**:material/storefront: Commercial & Dining Density**")
     slider_weights["C6_POI_Shopping_Malls"] = st.slider(
-        "🛍️ Shopping Malls & Retail (C6) [Benefit]",
+        "Shopping Malls & Retail (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C6_POI_Shopping_Malls"]),
         step=0.01,
     )
     slider_weights["C6_POI_Restaurants"] = st.slider(
-        "🍽️ Restaurants & Dining (C6) [Benefit]",
+        "Restaurants & Dining (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C6_POI_Restaurants"]),
         step=0.01,
     )
     slider_weights["C6_POI_Theatres"] = st.slider(
-        "🎬 Theatres & Cinemas (C6) [Benefit]",
+        "Theatres & Cinemas (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C6_POI_Theatres"]),
         step=0.01,
     )
 
 with col_s3:
-    st.markdown("**Public Infrastructure & Transit**")
+    st.markdown("**:material/local_hospital: Public Infrastructure & Transit**")
     slider_weights["C6_POI_Hospitals"] = st.slider(
-        "🏥 Hospitals & Healthcare (C6) [Benefit]",
+        "Hospitals & Healthcare (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C6_POI_Hospitals"]),
         step=0.01,
     )
     slider_weights["C6_POI_Bus_Stops"] = st.slider(
-        "🚌 Bus Stops & Transit (C6) [Benefit]",
+        "Bus Stops & Transit (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C6_POI_Bus_Stops"]),
         step=0.01,
     )
     slider_weights["C6_POI_Petrol_Bunks"] = st.slider(
-        "⛽ Petrol Bunks & Fuel (C6) [Benefit]",
+        "Petrol Bunks & Fuel (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
         value=float(st.session_state["weights"]["C6_POI_Petrol_Bunks"]),
         step=0.01,
@@ -149,7 +149,7 @@ live_results = compute_live_whatif_ranking(
 st.markdown("---")
 
 # Display Outcomes & Metrics
-st.subheader("🏆 Live Recomputed Top-10 Candidate Sites")
+st.subheader(":material/trophy: Live Recomputed Top-10 Candidate Sites")
 
 top1_site = live_results.iloc[0]
 base_top1_site = base_rankings_v2.iloc[0]
@@ -210,7 +210,7 @@ st.dataframe(
 st.markdown("---")
 
 # Scatter comparison plot
-st.subheader("📈 Baseline vs. Custom Rank Dispersal")
+st.subheader(":material/scatter_plot: Baseline vs. Custom Rank Dispersal")
 st.markdown("Points lying along the diagonal line represent candidate sites whose rank remains unchanged.")
 
 fig = px.scatter(

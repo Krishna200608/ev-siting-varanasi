@@ -14,9 +14,9 @@ if str(REPO_ROOT) not in sys.path:
 from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings
 
 
-st.set_page_config(page_title="Site Map — EV Siting Varanasi", page_icon="🗺️", layout="wide")
+st.set_page_config(page_title="Site Map — EV Siting Varanasi", page_icon=":material/map:", layout="wide")
 
-st.title("🗺️ Interactive Spatial Candidate Site Map")
+st.title(":material/map: Interactive Spatial Candidate Site Map")
 st.markdown(
     "Explore the spatial distribution of all **308 candidate alternatives** across the **76.99 km²** "
     "Varanasi municipal corporation extent. Candidate sites are evaluated on a regular 500m metric fishnet grid."
@@ -37,9 +37,10 @@ with col_opt1:
 
 with col_opt2:
     st.info(
-        "💡 **Visualization Legend:** Circles are sized and colored by TOPSIS-CRITIC suitability score "
+        "**Visualization Legend:** Circles are sized and colored by TOPSIS-CRITIC suitability score "
         "(Dark Green = Highly Suitable, Yellow = Moderate, Red/Orange = Low). The **Top-5 Sites** are "
-        "highlighted with gold-bordered crimson star markers."
+        "highlighted with gold-bordered crimson star markers.",
+        icon=":material/info:",
     )
 
 # Load data
@@ -138,7 +139,7 @@ for _, row in merged_df.iterrows():
 st_folium(m, width="100%", height=620, returned_objects=[])
 
 # Top-5 Table Callout
-st.subheader(f"🏆 Top-5 Ranked Charging Station Locations ({version_choice.split(':')[0]})")
+st.subheader(f":material/trophy: Top-5 Ranked Charging Station Locations ({version_choice.split(':')[0]})")
 top5_display = merged_df.sort_values("topsis_critic_rank").head(5)[[
     "site_id", "latitude", "longitude", "topsis_critic_score", "topsis_critic_rank",
     "C1_Major_Roads", "C6_POI_Shopping_Malls", "C6_POI_Restaurants", "C6_POI_Hospitals"

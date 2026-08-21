@@ -14,9 +14,9 @@ if str(REPO_ROOT) not in sys.path:
 from dashboard.utils.data_loader import load_sensitivity_results, get_figure_path
 
 
-st.set_page_config(page_title="Sensitivity Analysis — EV Siting Varanasi", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Sensitivity Analysis — EV Siting Varanasi", page_icon=":material/query_stats:", layout="wide")
 
-st.title("📊 Multi-Scenario Sensitivity & Scale-Dependent Dynamics")
+st.title(":material/query_stats: Multi-Scenario Sensitivity & Scale-Dependent Dynamics")
 st.markdown(
     "Following Rashmitha et al. (2024), we evaluate the robustness of the primary TOPSIS-CRITIC site suitability ranking "
     "across **12 criteria weight perturbation scenarios** spanning individual criterion shifts, equal weighting, "
@@ -26,7 +26,7 @@ st.markdown(
 st.markdown("---")
 
 # Scale-Dependence Callout Box (S11 Road Sensitivity)
-st.subheader("🔍 Major Scale-Dependence Discovery (Scenario S11)")
+st.subheader(":material/search: Major Scale-Dependence Discovery (Scenario S11)")
 st.warning(
     """
     **Scale-Dependent Road Proximity Dynamics (Scenario S11: 50% Road Weight):**
@@ -100,7 +100,7 @@ with tab_sample:
 st.markdown("---")
 
 # Visual Figure
-st.subheader("📈 Multi-Scenario Sensitivity Visualizations")
+st.subheader(":material/insights: Multi-Scenario Sensitivity Visualizations")
 try:
     fig_path = get_figure_path("mcdm_sensitivity_analysis_full_v2.png")
     st.image(

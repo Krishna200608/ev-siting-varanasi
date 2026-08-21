@@ -10,7 +10,7 @@ import streamlit as st
 # Set Streamlit Page Configuration
 st.set_page_config(
     page_title="EV Siting Varanasi — Decision Support Framework",
-    page_icon="⚡",
+    page_icon=":material/electric_bolt:",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -25,13 +25,13 @@ from dashboard.utils.data_loader import load_mcdm_rankings, load_decision_matrix
 
 def main() -> None:
     """Render the Main Overview & Navigation Page."""
-    st.title("⚡ EV Charging Station Siting Decision Support Framework")
+    st.title(":material/electric_bolt: EV Charging Station Siting Decision Support Framework")
     st.caption("A Two-Stage Spatial Multi-Criteria (GIS-MCDM) & Machine Learning Framework — Varanasi, India")
 
     st.markdown("---")
 
     # Executive Summary
-    st.subheader("📌 Project Overview & Two-Stage Architecture")
+    st.subheader(":material/info: Project Overview & Two-Stage Architecture")
     st.markdown(
         """
         This decision support system addresses the critical urban planning and capital allocation challenge of 
@@ -64,7 +64,7 @@ def main() -> None:
         total_candidates = 308
 
     # Headline Stat Callouts
-    st.subheader("📊 Key Urban & Decision Analytics Metrics")
+    st.subheader(":material/analytics: Key Urban & Decision Analytics Metrics")
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
@@ -104,7 +104,7 @@ def main() -> None:
     st.markdown("---")
 
     # Navigation Guide
-    st.subheader("🧭 Interactive Dashboard Navigation")
+    st.subheader(":material/explore: Interactive Dashboard Navigation")
     st.markdown("Explore the detailed components of the decision support framework using the sidebar:")
 
     nav_col1, nav_col2 = st.columns(2)
@@ -112,13 +112,13 @@ def main() -> None:
     with nav_col1:
         st.markdown(
             """
-            * **🗺️ 1. Site Map:** Interactive Folium map displaying all 308 candidate alternatives colored by suitability, 
+            * **:material/map: 1. Site Map:** Interactive Folium map displaying all 308 candidate alternatives colored by suitability, 
               with Top-5 highlights and a Milestone 6 vs. Milestone 7 spatial measurement toggle.
-            * **📋 2. MCDM Rankings:** Searchable, sortable consolidated rankings table comparing TOPSIS and WASPAS 
+            * **:material/leaderboard: 2. MCDM Rankings:** Searchable, sortable consolidated rankings table comparing TOPSIS and WASPAS 
               under objective CRITIC and Shannon Entropy weighting.
-            * **🎛️ 3. What-If Weight Explorer:** Live, interactive sensitivity tool with 9 sliders to recompute TOPSIS rankings 
+            * **:material/tune: 3. What-If Weight Explorer:** Live, interactive sensitivity tool with 9 sliders to recompute TOPSIS rankings 
               in real-time and observe rank shifts against the empirical baseline.
-            * **📈 4. Demand & SHAP:** 24-hour diurnal charging load profiles, SHAP feature importance curves, and 
+            * **:material/show_chart: 4. Demand & SHAP:** 24-hour diurnal charging load profiles, SHAP feature importance curves, and 
               methodological rationale on ML operational timing (RQ3).
             """
         )
@@ -126,11 +126,11 @@ def main() -> None:
     with nav_col2:
         st.markdown(
             """
-            * **📊 5. Sensitivity Analysis:** 12-scenario criteria weight perturbation analysis and scale-dependent road 
+            * **:material/query_stats: 5. Sensitivity Analysis:** 12-scenario criteria weight perturbation analysis and scale-dependent road 
               proximity dynamics (S11: ρ = 0.9613 → ρ = 0.7763).
-            * **🔍 6. Data Quality Audit:** Systematic 9-criteria × 2-version audit table, automated degeneracy safeguards, 
+            * **:material/verified_user: 6. Data Quality Audit:** Systematic 9-criteria × 2-version audit table, automated degeneracy safeguards, 
               and root-cause diagnostics.
-            * **📖 7. Project Journey:** Chronological narrative of key architectural decisions (AD-1 through AD-11) documenting 
+            * **:material/menu_book: 7. Project Journey:** Chronological narrative of key architectural decisions (AD-1 through AD-11) documenting 
               methodological challenges, rejected shortcuts, and verified solutions.
             """
         )

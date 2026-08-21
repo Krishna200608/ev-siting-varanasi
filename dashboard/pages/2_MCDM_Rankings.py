@@ -13,9 +13,9 @@ if str(REPO_ROOT) not in sys.path:
 from dashboard.utils.data_loader import load_mcdm_rankings
 
 
-st.set_page_config(page_title="MCDM Rankings — EV Siting Varanasi", page_icon="📋", layout="wide")
+st.set_page_config(page_title="MCDM Rankings — EV Siting Varanasi", page_icon=":material/leaderboard:", layout="wide")
 
-st.title("📋 Multi-Criteria Siting Rankings & Method Comparison")
+st.title(":material/leaderboard: Multi-Criteria Siting Rankings & Method Comparison")
 st.markdown(
     "Analyze the comprehensive rankings across all **4 MCDM algorithmic combinations**: "
     "**TOPSIS** (Primary Ideal-Solution Benchmark) and **WASPAS** (Weighted Sum-Product Model) "
@@ -118,7 +118,8 @@ st.dataframe(
 # Download CSV
 csv_data = formatted_table.to_csv(index=False).encode("utf-8")
 st.download_button(
-    label="📥 Download Filtered Rankings (CSV)",
+    label="Download Filtered Rankings (CSV)",
+    icon=":material/download:",
     data=csv_data,
     file_name=f"varanasi_ev_siting_rankings_{version}.csv",
     mime="text/csv",
@@ -127,7 +128,7 @@ st.download_button(
 st.markdown("---")
 
 # Inter-Method Rank Correlation
-st.subheader("📊 Inter-Method Rank Concordance & Correlation")
+st.subheader(":material/query_stats: Inter-Method Rank Concordance & Correlation")
 st.markdown(
     "Spearman's rank correlation (ρ) between algorithms confirms exceptional consensus, "
     "demonstrating that site prioritization is robust to algorithmic choice."
