@@ -140,5 +140,18 @@ def main() -> None:
     st.caption("Developed by **Krishna Sikheriya** | Public Research Repository: [github.com/Krishna200608/ev-siting-varanasi](https://github.com/Krishna200608/ev-siting-varanasi)")
 
 
-if __name__ == "__main__":
-    main()
+# Configure Multi-Page Navigation with explicit "Home" title
+pages = [
+    st.Page(main, title="Home", icon=":material/home:", default=True),
+    st.Page("pages/1_Site_Map.py", title="1. Site Map", icon=":material/map:"),
+    st.Page("pages/2_MCDM_Rankings.py", title="2. MCDM Rankings", icon=":material/leaderboard:"),
+    st.Page("pages/3_Whatif_Weight_Explorer.py", title="3. What-If Explorer", icon=":material/tune:"),
+    st.Page("pages/4_Demand_and_SHAP.py", title="4. Demand & SHAP", icon=":material/show_chart:"),
+    st.Page("pages/5_Sensitivity_Analysis.py", title="5. Sensitivity Analysis", icon=":material/query_stats:"),
+    st.Page("pages/6_Data_Quality_Audit.py", title="6. Data Quality Audit", icon=":material/verified_user:"),
+    st.Page("pages/7_Project_Journey.py", title="7. Project Journey", icon=":material/menu_book:"),
+]
+
+pg = st.navigation(pages)
+pg.run()
+
