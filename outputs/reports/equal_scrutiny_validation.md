@@ -1,6 +1,6 @@
 # Equal-Scrutiny Multi-Zone Validation Report
 
-**Author:** Decision Analytics Research Group  
+**Author:** Krishna Sikheriya  
 **Project:** Two-Stage EV Charging Station Siting Decision Support Framework (Varanasi, India)  
 **Methodological Milestone:** Milestone 7 & 7b — Equal-Scrutiny Multi-Zone Validation & Recalibration Mechanism  
 **Date:** August 2026  

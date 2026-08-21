@@ -136,7 +136,7 @@ def main() -> None:
         )
 
     st.markdown("---")
-    st.caption("Developed by the Decision Analytics Research Group | Public Research Repository: github.com/Krishna200608/ev-siting-varanasi")
+    st.caption("Developed by **Krishna Sikheriya** | Public Research Repository: [github.com/Krishna200608/ev-siting-varanasi](https://github.com/Krishna200608/ev-siting-varanasi)")
 
 
 if __name__ == "__main__":

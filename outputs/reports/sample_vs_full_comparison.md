@@ -1,6 +1,6 @@
 # Comparative Evaluation Report: Sample-Mode vs. Full-Mode Citywide Siting Analysis
 
-**Author:** Decision Analytics Research Group  
+**Author:** Krishna Sikheriya  
 **Project:** Two-Stage EV Charging Station Siting Decision Support Framework (Varanasi, India)  
 **Methodological Milestone:** Milestone 6 — Full-Mode Citywide Run & Multi-Scale Validation  
 **Date:** August 2026  
