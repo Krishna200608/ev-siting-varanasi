@@ -236,3 +236,26 @@ def test_unconfirmed_criteria_raise_not_implemented() -> None:
 
     with pytest.raises(NotImplementedError, match="Grid substation data source pending"):
         compute_grid_proximity_raster(dummy_path, dummy_gdf)
+
+
+# ---------------------------------------------------------------------------
+# 5. Milestone 7 Equal-Scrutiny Multi-Zone Validation Tests
+# ---------------------------------------------------------------------------
+
+def test_comparison_zone_containment_in_boundary() -> None:
+    """Verify that all 4 commercial comparison zone centroids lie within the municipal polygon."""
+    boundary_gdf = get_varanasi_boundary(mode="full")
+    poly = boundary_gdf.geometry.iloc[0]
+
+    # Key commercial zone centroids (Sigra, Lanka, Cantt, Godowlia)
+    zone_centroids = [
+        ("Godowlia", 25.3100, 83.0050),
+        ("Sigra", 25.31126, 82.98521),
+        ("Lanka", 25.28109, 82.99884),
+        ("Cantonment", 25.32757, 82.98624),
+    ]
+
+    for name, lat, lon in zone_centroids:
+        pt = Point(lon, lat)
+        assert poly.contains(pt), f"Zone centroid for '{name}' ({lat}, {lon}) is outside the municipal polygon."
+

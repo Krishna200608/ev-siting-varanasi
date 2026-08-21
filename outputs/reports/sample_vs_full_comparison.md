@@ -27,6 +27,10 @@ This report evaluates the empirical consistency, spatial transferability, and se
    +-------------------------------------------------------------+
 ```
 
+> [!NOTE]
+> **Equal-Scrutiny Multi-Zone Validation Note (Milestone 7):**
+> Following Milestone 6, an equal-scrutiny validation was conducted deploying symmetric 5-tile nested high-density meshes ($r=800\text{m}$) across Sigra, Lanka/BHU, and Cantonment. The full empirical evaluation is documented in [`equal_scrutiny_validation.md`](file:///d:/Lab/Managing%20Corporate%20Entrepreneurship/ev-siting-varanasi/outputs/reports/equal_scrutiny_validation.md), confirming that the Top-5 Godowlia cluster is genuine and robust under equal spatial measurement across the city.
+
 ---
 
 ## 2. Top-Ranked Candidate Site Alignment

@@ -56,11 +56,21 @@ This document is the **authoritative reference** for confirmed data sources, res
   - **Cap Verification:** Empirical testing on Godowlia ($r=2,500\text{m}$ and $r=1,000\text{m}$) confirmed that 5 of 7 POI categories hit Google's hard 20-result limit per `searchNearby` call.
   - **Mesh Architecture:** Deployed a 30-tile mesh (25 primary tiles $r=1,800\text{m}$ on a $5 \times 5$ grid + 5 nested dense-core tiles $r=800\text{m}$ in the Godowlia–Dashashwamedh–Chowk corridor) with `place_id` deduplication and incremental disk caching (`data/raw/gis/full_run_cache/`).
   - **Documented Limitation:** While the 30-tile mesh substantially mitigates single-tile truncation (yielding 230–450+ unique POIs per category across the city), individual tiles in the extreme-density historic core remain subject to residual undercounting.
-- **Citywide Results:**
-  - **Decision Matrix:** `data/processed/gis/decision_matrix_full.csv` (308 sites $\times 12$ columns).
-  - **Rankings:** `outputs/tables/mcdm_rankings_full.csv` (Top-5: `SITE_195` Godowlia, `SITE_217` Dashashwamedh, `SITE_196` Godowlia North, `SITE_218` Vishwanath Corridor, `SITE_194` Sonarpura).
-  - **Sensitivity Analysis:** `outputs/tables/mcdm_sensitivity_results_full.csv` & `outputs/figures/mcdm_sensitivity_analysis_full.png` (100% Top-5 overlap across S01–S10; scale-dependent road sensitivity in S11 with $\rho=0.7763$).
-  - **Comparative Report:** `outputs/reports/sample_vs_full_comparison.md`.
+### AD-10: Milestone 7 Equal-Scrutiny Multi-Zone Validation Outcome & Residual Limitations
+- **Problem Statement & Confound:** In Milestone 6, the citywide TOPSIS-CRITIC Top-5 clustered entirely in the Godowlia–Dashashwamedh corridor, which was the only area that had received 5 extra nested high-density tiles ($r=800\text{m}$). This created an empirical question: was Godowlia genuinely the top zone, or was it an artifact of spatial measurement granularity?
+- **Validation Methodology & Sourcing Provenance:**
+  - Deployed symmetric 5-tile nested high-density meshes ($r=800\text{m}$) across 3 other major commercial hubs: **Sigra Hub** (5 tiles), **Lanka / BHU Road** (5 tiles), and **Cantonment (Cantt) Market & Station** (5 tiles) — matching Godowlia's 5 tiles exactly.
+  - Audited coordinate provenance: **11 of 15 sub-tiles (73.3%)** independently Nominatim-verified; **4 of 15 sub-tiles (26.7%)** manually placed geometric offsets around verified landmarks; **100%** confirmed inside the $76.99\text{ km}^2$ municipal boundary.
+- **Empirical Outcome:**
+  - **Godowlia Dominance Validated as Genuine:** All 5 original Top-5 candidate sites (`SITE_195`, `SITE_217`, `SITE_218`, `SITE_196`, `SITE_194`) successfully defended their Top-5 positions under equal scrutiny.
+  - **Top-10 Influx:** `SITE_153` (Northern Sigra / Englishia Line, Lat: 25.3259, Lon: 82.9903) climbed from Rank 19 $\to$ **Rank 10** (Score: 0.6006), demonstrating that equal measurement elevated legitimate high-density commercial nodes into the top tier while confirming Godowlia's composite primacy ($>0.71$).
+- **Residual Documented Limitation:**
+  - Only **4 urban zones total** (Godowlia, Sigra, Lanka, Cantt; 20 nested tiles total) have received high-density treatment ($r=800\text{m}$). The remaining peripheral and suburban municipal sectors remain evaluated on the baseline 25-tile grid ($r=1,800\text{m}$).
+- **Deliverables:**
+  - Decision Matrix: `data/processed/gis/decision_matrix_full_v2.csv`
+  - Rankings: `outputs/tables/mcdm_rankings_full_v2.csv`
+  - Sensitivity Analysis: `outputs/tables/mcdm_sensitivity_results_full_v2.csv` & `outputs/figures/mcdm_sensitivity_analysis_full_v2.png`
+  - Comprehensive Report: `outputs/reports/equal_scrutiny_validation.md`
 
 ---
 

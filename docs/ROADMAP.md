@@ -64,4 +64,15 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
   - Full 12-Scenario Sensitivity Analysis: `outputs/tables/mcdm_sensitivity_results_full.csv` & `outputs/figures/mcdm_sensitivity_analysis_full.png` (100% Top-5 stability across S01–S10; revealed scale-dependent road proximity sensitivity in S11 with $\rho = 0.7763$).
 - **Comparative Evaluation Report:** Synthesized sample-vs-full spatial transferability in `outputs/reports/sample_vs_full_comparison.md`, demonstrating core cluster persistence and score dynamic range expansion (0.2468 to 0.7782).
 
+---
+
+## Milestone 7 — Equal-Scrutiny Multi-Zone Validation (Completed)
+- **Resolved Methodological Confound:** Addressed whether Godowlia's dominance was an artifact of nested tile placement by deploying symmetric 5-tile nested high-density meshes ($r=800\text{m}$) across Sigra, Lanka/BHU, and Cantonment (Cantt) nodes (15 new tiles, 40 total citywide).
+- **Audited Coordinate Provenance (AD-10):** 11 of 15 sub-tiles independently Nominatim-verified; 4 of 15 manually placed geometric offsets around verified landmarks; 100% boundary containment verified.
+- **Definitive Validation Outcome:**
+  - **Godowlia Primacy Confirmed as Genuine:** All 5 original Top-5 sites (`SITE_195`, `SITE_217`, `SITE_218`, `SITE_196`, `SITE_194`) successfully defended their Top-5 positions under equal scrutiny.
+  - **Top-10 Influx:** `SITE_153` (Northern Sigra / Englishia Line) rose from Rank 19 $\to$ **Rank 10** (Score: 0.6006).
+  - **Versioned Deliverables:** `data/processed/gis/decision_matrix_full_v2.csv`, `outputs/tables/mcdm_rankings_full_v2.csv`, `outputs/tables/mcdm_sensitivity_results_full_v2.csv`, `outputs/figures/mcdm_sensitivity_analysis_full_v2.png`, and `outputs/reports/equal_scrutiny_validation.md`.
+
+
 

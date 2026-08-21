@@ -150,6 +150,24 @@ Full-Mode Deliverables:
 - **Full Sensitivity Analysis:** `outputs/tables/mcdm_sensitivity_results_full.csv` & `outputs/figures/mcdm_sensitivity_analysis_full.png`
 - **Sample vs. Full Comparative Report:** `outputs/reports/sample_vs_full_comparison.md`
 
+### Milestone 7: Equal-Scrutiny Multi-Zone Validation (Sigra, Lanka, Cantt)
+To run the equal-scrutiny pipeline with 5 nested tiles ($r=800\text{m}$) across all 4 major commercial nodes:
+```bash
+# 1. Build equal-scrutiny decision matrix (v2)
+python -c "from src.gis.build_decision_matrix import build_decision_matrix; build_decision_matrix(mode='full_v2')"
+
+# 2. Run equal-scrutiny MCDM ranking (v2)
+python -c "from src.mcdm.pipeline import run_mcdm_pipeline; run_mcdm_pipeline(decision_matrix_path='data/processed/gis/decision_matrix_full_v2.csv', output_table_path='outputs/tables/mcdm_rankings_full_v2.csv')"
+
+# 3. Run equal-scrutiny 12-scenario sensitivity analysis (v2)
+python -c "import pandas as pd; from src.integration.sensitivity_analysis import run_mcdm_criteria_sensitivity, generate_mcdm_sensitivity_figure; df = pd.read_csv('data/processed/gis/decision_matrix_full_v2.csv'); cols = [c for c in df.columns if c not in ['site_id', 'latitude', 'longitude']]; types = ['benefit', 'cost', 'benefit', 'benefit', 'benefit', 'benefit', 'benefit', 'benefit', 'benefit']; s = run_mcdm_criteria_sensitivity(df[cols], types, output_table_path='outputs/tables/mcdm_sensitivity_results_full_v2.csv'); generate_mcdm_sensitivity_figure(s, 'outputs/figures/mcdm_sensitivity_analysis_full_v2.png')"
+```
+Equal-Scrutiny Deliverables:
+- **Decision Matrix (v2):** `data/processed/gis/decision_matrix_full_v2.csv`
+- **MCDM Rankings (v2):** `outputs/tables/mcdm_rankings_full_v2.csv` (Top-5: `SITE_195`, `SITE_217`, `SITE_218`, `SITE_196`, `SITE_194`)
+- **Sensitivity Analysis (v2):** `outputs/tables/mcdm_sensitivity_results_full_v2.csv` & `outputs/figures/mcdm_sensitivity_analysis_full_v2.png`
+- **Validation Report:** `outputs/reports/equal_scrutiny_validation.md` (Definitive confirmation that Godowlia primacy is a genuine urban concentration)
+
 ---
 
 ## 5. Running Tests

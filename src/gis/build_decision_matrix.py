@@ -718,15 +718,24 @@ def build_decision_matrix(
     sample_bbox = exec_cfg.get("sample_bbox")
 
     if output_processed_path is None:
-        if mode == "full":
+        if mode == "full_v2":
+            output_processed_path = Path("data/processed/gis/decision_matrix_full_v2.csv")
+        elif mode == "full":
             output_processed_path = Path("data/processed/gis/decision_matrix_full.csv")
         else:
             output_processed_path = Path("data/processed/gis/decision_matrix.csv")
     else:
         output_processed_path = Path(output_processed_path)
 
-    cache_dir = Path("data/raw/gis/full_run_cache") if mode == "full" else None
-    use_mesh = (mode == "full")
+    if mode == "full_v2":
+        cache_dir = Path("data/raw/gis/full_run_cache_v2")
+        use_mesh = True
+    elif mode == "full":
+        cache_dir = Path("data/raw/gis/full_run_cache")
+        use_mesh = True
+    else:
+        cache_dir = None
+        use_mesh = False
 
     print(f"[GIS Pipeline] Initializing in '{mode}' mode (spacing: {spacing_m}m)...")
 

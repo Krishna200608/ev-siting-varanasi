@@ -1,0 +1,80 @@
+[
+  {
+    "place_id": "osm_node_292716538",
+    "name": "Unknown",
+    "latitude": 25.2818476,
+    "longitude": 82.9547013
+  },
+  {
+    "place_id": "osm_node_292730020",
+    "name": "BLW Cinema Hall",
+    "latitude": 25.2862557,
+    "longitude": 82.9618939
+  },
+  {
+    "place_id": "osm_node_293220495",
+    "name": "Unknown",
+    "latitude": 25.2926304,
+    "longitude": 82.990536
+  },
+  {
+    "place_id": "osm_node_293485011",
+    "name": "Unknown",
+    "latitude": 25.3339798,
+    "longitude": 82.9868452
+  },
+  {
+    "place_id": "osm_node_297761130",
+    "name": "Unknown",
+    "latitude": 25.281955,
+    "longitude": 83.0322114
+  },
+  {
+    "place_id": "osm_node_4143914591",
+    "name": "IP Cinemas",
+    "latitude": 25.3165471,
+    "longitude": 82.9901107
+  },
+  {
+    "place_id": "osm_node_7284586689",
+    "name": "JHV Cinemas",
+    "latitude": 25.3354881,
+    "longitude": 82.9776355
+  },
+  {
+    "place_id": "osm_node_8844949735",
+    "name": "Sajjan Cinema",
+    "latitude": 25.3158755,
+    "longitude": 82.9887006
+  },
+  {
+    "place_id": "osm_node_8848598037",
+    "name": "Carnival Cinema PDR",
+    "latitude": 25.3100623,
+    "longitude": 83.002923
+  },
+  {
+    "place_id": "osm_node_11697410090",
+    "name": "IP Vijaya Mall Cinema Hall",
+    "latitude": 25.297533,
+    "longitude": 83.0010284
+  },
+  {
+    "place_id": "osm_way_466339076",
+    "name": "Unknown",
+    "latitude": 25.3329838,
+    "longitude": 83.0052556
+  },
+  {
+    "place_id": "osm_way_800791374",
+    "name": "Harmony",
+    "latitude": 25.3441904,
+    "longitude": 82.9706254
+  },
+  {
+    "place_id": "osm_way_800791376",
+    "name": "Ninaad",
+    "latitude": 25.3446968,
+    "longitude": 82.9702847
+  }
+]

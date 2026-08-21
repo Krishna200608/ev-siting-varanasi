@@ -1,0 +1,68 @@
+[
+  {
+    "place_id": "osm_node_4503519483",
+    "name": "Red Bus",
+    "latitude": 25.3012322,
+    "longitude": 82.9510519
+  },
+  {
+    "place_id": "osm_node_5081020221",
+    "name": "Unknown",
+    "latitude": 25.3092414,
+    "longitude": 83.0068406
+  },
+  {
+    "place_id": "osm_node_5235771621",
+    "name": "Unknown",
+    "latitude": 25.3096647,
+    "longitude": 83.005093
+  },
+  {
+    "place_id": "osm_node_5414347321",
+    "name": "Sanjay travels",
+    "latitude": 25.3306275,
+    "longitude": 82.9929914
+  },
+  {
+    "place_id": "osm_node_6261924154",
+    "name": "Varanasi Bus Stand",
+    "latitude": 25.3287535,
+    "longitude": 82.9901165
+  },
+  {
+    "place_id": "osm_node_6717827487",
+    "name": "Shared TukTuk to Sarnath 30 rupees",
+    "latitude": 25.3189776,
+    "longitude": 83.0130258
+  },
+  {
+    "place_id": "osm_node_6870985986",
+    "name": "Unknown",
+    "latitude": 25.31609,
+    "longitude": 82.9673833
+  },
+  {
+    "place_id": "osm_node_6871232985",
+    "name": "Unknown",
+    "latitude": 25.3159889,
+    "longitude": 82.967366
+  },
+  {
+    "place_id": "osm_node_12801864807",
+    "name": "Gol Gadda",
+    "latitude": 25.3310679,
+    "longitude": 83.0183406
+  },
+  {
+    "place_id": "osm_node_13131082898",
+    "name": "Unknown",
+    "latitude": 25.2774368,
+    "longitude": 83.0021359
+  },
+  {
+    "place_id": "osm_node_13629614301",
+    "name": "Unknown",
+    "latitude": 25.3326098,
+    "longitude": 82.9998289
+  }
+]
