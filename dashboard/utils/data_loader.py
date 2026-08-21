@@ -17,8 +17,9 @@ def render_sidebar_logo() -> None:
     """Render the official project logo in the sidebar if available."""
     logo_path = REPO_ROOT / "assets" / "Logos" / "Logo_1.png"
     if logo_path.exists():
-        st.sidebar.image(str(logo_path), use_container_width=True)
+        st.sidebar.image(str(logo_path), width="stretch")
         st.sidebar.markdown("---")
+
 
 
 @st.cache_data

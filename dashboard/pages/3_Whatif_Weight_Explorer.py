@@ -39,23 +39,23 @@ st.subheader(":material/flash_on: Quick Weight Presets")
 preset_cols = st.columns(5)
 
 with preset_cols[0]:
-    if st.button("CRITIC Default (Empirical)", icon=":material/analytics:", use_container_width=True):
+    if st.button("CRITIC Default (Empirical)", icon=":material/analytics:", width="stretch"):
         st.session_state["weights"] = default_critic.copy()
 
 with preset_cols[1]:
-    if st.button("Equal Weights (1/9)", icon=":material/balance:", use_container_width=True):
+    if st.button("Equal Weights (1/9)", icon=":material/balance:", width="stretch"):
         st.session_state["weights"] = {k: 1.0 / 9.0 for k in default_critic.keys()}
 
 with preset_cols[2]:
-    if st.button("Road Arterial Focus (50%)", icon=":material/alt_route:", use_container_width=True):
+    if st.button("Road Arterial Focus (50%)", icon=":material/alt_route:", width="stretch"):
         st.session_state["weights"] = {k: 0.50 if k == "C1_Major_Roads" else 0.50 / 8.0 for k in default_critic.keys()}
 
 with preset_cols[3]:
-    if st.button("Retail Mall Focus (50%)", icon=":material/shopping_cart:", use_container_width=True):
+    if st.button("Retail Mall Focus (50%)", icon=":material/shopping_cart:", width="stretch"):
         st.session_state["weights"] = {k: 0.50 if k == "C6_POI_Shopping_Malls" else 0.50 / 8.0 for k in default_critic.keys()}
 
 with preset_cols[4]:
-    if st.button("Healthcare Focus (50%)", icon=":material/local_hospital:", use_container_width=True):
+    if st.button("Healthcare Focus (50%)", icon=":material/local_hospital:", width="stretch"):
         st.session_state["weights"] = {k: 0.50 if k == "C6_POI_Hospitals" else 0.50 / 8.0 for k in default_critic.keys()}
 
 # Initialize session state if not set
@@ -205,7 +205,7 @@ st.dataframe(
         "C6_POI_Restaurants": "{:.2f}",
         "C6_POI_Hospitals": "{:.2f}",
     }),
-    use_container_width=True,
+    width="stretch",
 )
 
 st.markdown("---")
@@ -228,4 +228,4 @@ fig.add_shape(
     type="line", line=dict(dash="dash", color="gray"),
     x0=1, y0=1, x1=308, y1=308
 )
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")

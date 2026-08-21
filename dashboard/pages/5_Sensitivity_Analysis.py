@@ -67,7 +67,7 @@ with tab_v2:
                 "Top-5 Overlap (%)": "{:.1f}%",
                 "Top-10 Overlap (%)": "{:.1f}%",
             }),
-            use_container_width=True,
+            width="stretch",
             height=430,
         )
     with col2:
@@ -86,17 +86,17 @@ with tab_v2:
             xaxis=dict(type="category", tickmode="linear", dtick=1),
             margin=dict(l=20, r=20, t=40, b=20),
         )
-        st.plotly_chart(fig_bar, use_container_width=True)
+        st.plotly_chart(fig_bar, width="stretch")
 
 with tab_v1:
     sens_v1 = load_sensitivity_results("full_v1")
     st.markdown("**12-Scenario Perturbation Results (Milestone 6 Baseline):**")
-    st.dataframe(sens_v1, use_container_width=True)
+    st.dataframe(sens_v1, width="stretch")
 
 with tab_sample:
     sens_sample = load_sensitivity_results("sample")
     st.markdown("**12-Scenario Perturbation Results (Sample Mode, Central Varanasi):**")
-    st.dataframe(sens_sample, use_container_width=True)
+    st.dataframe(sens_sample, width="stretch")
 
 st.markdown("---")
 
@@ -107,7 +107,8 @@ try:
     st.image(
         Image.open(fig_path),
         caption="12-Scenario Sensitivity Analysis Curves: Spearman ρ, Kendall τ, and Shortlist Overlap (Citywide Mode)",
-        use_container_width=True,
+        width="stretch",
     )
 except Exception as e:
     st.warning(f"Sensitivity figure not loaded: {e}")
+

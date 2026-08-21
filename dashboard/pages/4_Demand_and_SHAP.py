@@ -64,7 +64,7 @@ with col_fig:
         hovermode="x unified",
         margin=dict(l=20, r=20, t=50, b=20),
     )
-    st.plotly_chart(fig_demand, use_container_width=True)
+    st.plotly_chart(fig_demand, width="stretch")
 
 with col_tbl:
     st.markdown("**Diurnal Summary Metrics:**")
@@ -92,7 +92,7 @@ with col_tbl:
         "Weekday (kWh)": "{:.2f}",
         "Weekend (kWh)": "{:.2f}",
         "Weighted Avg (kWh)": "{:.2f}",
-    }), height=270, use_container_width=True)
+    }), height=270, width="stretch")
 
 st.markdown("---")
 
@@ -116,7 +116,7 @@ with tab_full:
     with col_sh1:
         try:
             img_path = get_figure_path("shap_summary.png")
-            st.image(Image.open(img_path), caption="SHAP Summary Plot (Full-Feature ACN Model)", use_container_width=True)
+            st.image(Image.open(img_path), caption="SHAP Summary Plot (Full-Feature ACN Model)", width="stretch")
         except Exception as e:
             st.error(f"Could not load image: {e}")
     with col_sh2:
@@ -124,7 +124,7 @@ with tab_full:
             fi_path = REPO_ROOT / "outputs" / "tables" / "shap_feature_importance.csv"
             fi_df = pd.read_csv(fi_path)
             st.markdown("**Global Mean |SHAP| Values:**")
-            st.dataframe(fi_df.rename(columns={"feature": "Feature", "mean_abs_shap": "Mean |SHAP|"}), use_container_width=True)
+            st.dataframe(fi_df.rename(columns={"feature": "Feature", "mean_abs_shap": "Mean |SHAP|"}), width="stretch")
         except Exception as e:
             st.warning(f"Feature importance table not available: {e}")
 
@@ -140,7 +140,7 @@ with tab_trans:
     with col_tr1:
         try:
             img_path = get_figure_path("shap_summary_transferable.png")
-            st.image(Image.open(img_path), caption="SHAP Summary Plot (Transferable Temporal Model)", use_container_width=True)
+            st.image(Image.open(img_path), caption="SHAP Summary Plot (Transferable Temporal Model)", width="stretch")
         except Exception as e:
             st.error(f"Could not load image: {e}")
     with col_tr2:
@@ -148,7 +148,7 @@ with tab_trans:
             fi_path = REPO_ROOT / "outputs" / "tables" / "shap_feature_importance_transferable.csv"
             fi_df = pd.read_csv(fi_path)
             st.markdown("**Global Mean |SHAP| Values:**")
-            st.dataframe(fi_df.rename(columns={"feature": "Feature", "mean_abs_shap": "Mean |SHAP|"}), use_container_width=True)
+            st.dataframe(fi_df.rename(columns={"feature": "Feature", "mean_abs_shap": "Mean |SHAP|"}), width="stretch")
         except Exception as e:
             st.warning(f"Feature importance table not available: {e}")
 

@@ -166,5 +166,6 @@ st.dataframe(
         "Restaurants (C6)": "{:.2f}",
         "Hospitals (C6)": "{:.2f}",
     }),
-    use_container_width=True,
+    width="stretch",
 )
+

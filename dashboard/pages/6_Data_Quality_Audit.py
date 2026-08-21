@@ -34,15 +34,15 @@ def highlight_status(val: str) -> str:
         return "background-color: #ffcdd2; color: #b71c1c; font-weight: bold;"
     return ""
 
-# Apply formatting using map (compatible with pandas 2.1+ / 3.0+)
 st.dataframe(
     audit_df.style.map(highlight_status, subset=["v1 Status", "v2 Status"]).format({
         "v1 Min": "{:.4f}", "v1 Max": "{:.4f}", "v1 Mean": "{:.4f}", "v1 Std Dev": "{:.4f}", "v1 Range (Δ)": "{:.4f}",
         "v2 Min": "{:.4f}", "v2 Max": "{:.4f}", "v2 Mean": "{:.4f}", "v2 Std Dev": "{:.4f}", "v2 Range (Δ)": "{:.4f}",
     }),
-    use_container_width=True,
+    width="stretch",
     height=380,
 )
+
 
 st.markdown("---")
 

@@ -112,7 +112,7 @@ st.dataframe(
         "TOPSIS-Entropy Score": "{:.4f}",
         "WASPAS-Entropy Score": "{:.4f}",
     }),
-    use_container_width=True,
+    width="stretch",
     height=450,
 )
 
@@ -151,4 +151,5 @@ fig.update_layout(
     font=dict(size=13),
     margin=dict(l=40, r=40, t=50, b=40),
 )
-st.plotly_chart(fig, use_container_width=True)
+st.plotly_chart(fig, width="stretch")
+
