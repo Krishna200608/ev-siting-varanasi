@@ -2,6 +2,10 @@
 
 A data-driven, two-stage decision-support framework for Electric Vehicle (EV) charging station site selection and demand forecasting in Varanasi, India. Developed as a semester research project for **Managing Corporate Entrepreneurship**, this framework integrates spatial Multi-Criteria Decision-Making (MCDM) for physical site suitability with explainable Machine Learning (ML) for relative demand estimation, supporting entrepreneurial capital allocation and de-risking infrastructure deployment in under-studied Tier-2 Indian cities.
 
+> **🚀 Live Interactive Web Dashboard:** [https://ev-siting-varanasi.streamlit.app](https://ev-siting-varanasi.streamlit.app)
+> 
+> Explore candidate site maps, live MCDM rankings, interactive What-If sensitivity weights, diurnal demand curves, and automated data quality audits directly in your browser.
+
 ---
 
 ## 1. Pipeline Overview
@@ -188,17 +192,30 @@ streamlit run dashboard/app.py
 
 ---
 
-## 5. Running Tests
+## 5. Running Tests & Continuous Integration
 
-To run the complete automated test suite (32 unit and integration tests covering GIS, MCDM, ML, Sensitivity, Data Quality Safeguards, and Dashboard components with zero live network calls):
+### Full Pipeline Test Suite
+To run the complete automated test suite (42 unit, integration, data-quality, and smoke tests covering GIS, MCDM, ML, Sensitivity, Data Quality Safeguards, and Dashboard components with zero live network calls):
 ```bash
 pytest tests/ -v
 ```
+
+### Isolated Lightweight Dashboard Smoke Tests
+To run the dashboard tests in an isolated lightweight environment matching Streamlit Community Cloud (zero heavy GIS/ML dependencies):
+```bash
+pytest tests/test_dashboard.py tests/test_dashboard_smoke.py -v
+```
+
+### GitHub Actions CI
+Automated testing is configured in [`.github/workflows/ci.yml`](.github/workflows/ci.yml) with two parallel jobs:
+1. `full-pipeline-tests`: Validates the full repository stack under Python 3.13.
+2. `dashboard-only-smoke`: Installs ONLY `dashboard/requirements.txt` to dynamically guarantee cloud runtime independence without geospatial/ML libraries.
 
 ---
 
 ## 6. Documentation & Key Links
 
+- **Live Streamlit Showcase:** [https://ev-siting-varanasi.streamlit.app](https://ev-siting-varanasi.streamlit.app)
 - **Implementation Roadmap:** See [docs/ROADMAP.md](docs/ROADMAP.md) for milestone status.
 - **Data Sourcing & Pending Decisions:** Consult [docs/PENDING_DECISIONS.md](docs/PENDING_DECISIONS.md) for authoritative data source statuses and architectural decisions (AD-1 through AD-11).
 - **Standing Agent Rules:** Review [AGENTS.md](AGENTS.md) for coding conventions and policies.

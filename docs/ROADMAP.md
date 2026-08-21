@@ -88,3 +88,13 @@ This repository is built incrementally milestone-by-milestone across a multi-wee
   6. **Data Quality Audit (`6_Data_Quality_Audit.py`):** $9 \times 2$ audit matrix and permanent pipeline safeguard documentation.
   7. **Project Journey (`7_Project_Journey.py`):** Grounded narrative of architectural decisions AD-1 through AD-11.
 - **Comprehensive Unit Testing:** Created `tests/test_dashboard.py` (32 total passing tests across the repository).
+
+---
+
+## Milestone 8b — Page Smoke Tests, CI Workflow & Cloud Deployment Confirmation (Completed)
+- **Streamlit AppTest Smoke Suite (`tests/test_dashboard_smoke.py`):** Implemented automated rendering smoke tests for `dashboard/app.py` and all 7 multi-page scripts under `dashboard/pages/` using `streamlit.testing.v1.AppTest`. Validated zero uncaught exceptions and verified intentional runtime failure detection (e.g. `Styler.applymap` deprecation catch).
+- **Dual-Job Continuous Integration (`.github/workflows/ci.yml`):**
+  1. `full-pipeline-tests`: Installs complete dependencies (`requirements.txt` + `dashboard/requirements.txt`) and runs all 42 unit, integration, and smoke tests under Python 3.13.
+  2. `dashboard-only-smoke`: Installs ONLY lightweight dashboard dependencies (`dashboard/requirements.txt`) and executes `test_dashboard.py` + `test_dashboard_smoke.py` to dynamically guarantee cloud runtime independence without heavy geospatial/ML libraries.
+- **Public Cloud Deployment:** Confirmed live deployment configuration on Streamlit Community Cloud from `main` branch (`dashboard/app.py`).
+- **Comprehensive Test Suite:** 42 test cases passing across all modules (`pytest tests/ -v`).
