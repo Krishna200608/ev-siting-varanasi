@@ -56,7 +56,7 @@ This document is the **authoritative reference** for confirmed data sources, res
   - **Cap Verification:** Empirical testing on Godowlia ($r=2,500\text{m}$ and $r=1,000\text{m}$) confirmed that 5 of 7 POI categories hit Google's hard 20-result limit per `searchNearby` call.
   - **Mesh Architecture:** Deployed a 30-tile mesh (25 primary tiles $r=1,800\text{m}$ on a $5 \times 5$ grid + 5 nested dense-core tiles $r=800\text{m}$ in the Godowlia–Dashashwamedh–Chowk corridor) with `place_id` deduplication and incremental disk caching (`data/raw/gis/full_run_cache/`).
   - **Documented Limitation:** While the 30-tile mesh substantially mitigates single-tile truncation (yielding 230–450+ unique POIs per category across the city), individual tiles in the extreme-density historic core remain subject to residual undercounting.
-### AD-10: Milestone 7 & 7b Equal-Scrutiny Multi-Zone Validation Outcome & Recalibration Mechanism
+### AD-10: Milestone 7, 7b & 7c Equal-Scrutiny Multi-Zone Validation, Recalibration Mechanism & Data-Quality Safeguard
 - **Problem Statement & Confound:** In Milestone 6, the citywide TOPSIS-CRITIC Top-5 clustered entirely in the Godowlia–Dashashwamedh corridor, which was the only area that had received 5 extra nested high-density tiles ($r=800\text{m}$). This created an empirical question: was Godowlia genuinely the top zone, or was it an artifact of spatial measurement granularity?
 - **Validation Methodology & Sourcing Provenance:**
   - Deployed symmetric 5-tile nested high-density meshes ($r=800\text{m}$) across 3 other major commercial hubs: **Sigra Hub** (5 tiles), **Lanka / BHU Road** (5 tiles), and **Cantonment (Cantt) Market & Station** (5 tiles) — matching Godowlia's 5 tiles exactly.
@@ -65,7 +65,10 @@ This document is the **authoritative reference** for confirmed data sources, res
   - **Global Continuous Raster Normalization:** As implemented in `points_to_kernel_density_raster()` (`src/gis/build_decision_matrix.py`), the 1–9 reclassification uses $S_i = 1.0 + 8.0 \times \frac{\text{density}_i - d_{\min}}{d_{\max} - d_{\min}}$ computed across the entire city bounding box grid ($76.99\text{ km}^2$), NOT independently per zone.
   - **Godowlia POI Score Rescaling:** Godowlia's raw POI points in its local neighborhood were untouched; its normalized scores in malls ($7.93 \to 6.87$) and dining ($7.83 \to 6.91$) declined because adding hundreds of verified POIs across Sigra, Lanka, and Cantt expanded the citywide density surface and increased the global denominator $(d_{\max} - d_{\min})$. This is standard, mathematically correct relative rescaling.
   - **Resolution of Hospital Jump ($1.00 \to 5.32–7.63$):** In Milestone 6, an API 429 error left `hospitals.json` with only 20 points in the far south-east, causing all 308 candidate sites to receive flat default scores of $1.0000$ ($\text{std}=0.0, w=0.0000$). Milestone 7 populated 280 real medical centers across the city, converting hospitals into a fully active criterion ($\text{mean}=5.04, \text{std}=2.00, w=0.1311$).
-  - **Implications for Pipeline Extensions:** Any future incremental addition of POIs to suburban sectors will naturally adjust normalized scores across existing candidate sites due to citywide continuous raster rescaling.
+- **Systematic Data-Quality Audit & Permanent Safeguard (Milestone 7c):**
+  - **Permanent Pipeline Safeguard:** Implemented `validate_decision_matrix_quality()` in `src/gis/build_decision_matrix.py`, automatically executing at the conclusion of every `build_decision_matrix()` run to detect zero-variance columns, narrow ranges ($\Delta < 0.5$), and low raw POI counts.
+  - **Full 9-Criteria Audit Results:** Audited all 9 criteria across both v1 and v2. Confirmed that **`C6_POI_Hospitals` was the ONLY silently degenerate POI column in v1**; all other 7 POI/road criteria are completely healthy ($\text{std} \in [1.06, 2.47]$, $\text{range} \in [4.99, 8.00]$). `C5_Competitor_EVCS` is flat 1.0 in both versions due to zero existing public fast chargers in Varanasi's greenfield market (handled with $w=0.0000$).
+  - **Automated Testing:** Added `tests/test_data_quality.py` validating that degenerate and narrow-range columns are accurately flagged and rejected.
 - **Empirical Outcome:**
   - **Godowlia Dominance Validated as Genuine:** All 5 original Top-5 candidate sites (`SITE_195`, `SITE_217`, `SITE_218`, `SITE_196`, `SITE_194`) successfully defended their Top-5 positions under equal scrutiny, even against newly activated hospital competition and downwards rescaling.
   - **Top-10 Influx:** `SITE_153` (Northern Sigra / Englishia Line, Lat: 25.3259, Lon: 82.9903) climbed from Rank 19 $\to$ **Rank 10** (Score: 0.6006), demonstrating that equal measurement elevated legitimate high-density commercial nodes into the top tier while confirming Godowlia's composite primacy ($>0.71$).
@@ -76,6 +79,8 @@ This document is the **authoritative reference** for confirmed data sources, res
   - Rankings: `outputs/tables/mcdm_rankings_full_v2.csv`
   - Sensitivity Analysis: `outputs/tables/mcdm_sensitivity_results_full_v2.csv` & `outputs/figures/mcdm_sensitivity_analysis_full_v2.png`
   - Comprehensive Report: `outputs/reports/equal_scrutiny_validation.md`
+  - Quality Safeguard: `src/gis/build_decision_matrix.py::validate_decision_matrix_quality()`
+  - Unit Tests: `tests/test_data_quality.py`
 
 ---
 

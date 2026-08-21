@@ -19,8 +19,9 @@ remain explicitly stubbed with NotImplementedError per docs/PENDING_DECISIONS.md
 import os
 import time
 import json
+import warnings
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -680,7 +681,135 @@ def compute_grid_proximity_raster(
 
 
 # ---------------------------------------------------------------------------
-# 6. End-to-End Orchestrator
+# 6. Data Quality & Degeneracy Validation Safeguard
+# ---------------------------------------------------------------------------
+
+def validate_decision_matrix_quality(
+    decision_matrix: Union[pd.DataFrame, Path, str],
+    raw_cache_dir: Optional[Union[Path, str]] = None,
+    min_variance_threshold: float = 1e-4,
+    min_range_threshold: float = 0.5,
+    min_poi_count_threshold: int = 5,
+    raise_on_degenerate: bool = False,
+) -> pd.DataFrame:
+    """Audit the decision matrix for degenerate criteria, zero-variance columns, and data anomalies.
+
+    Checks every criterion column for:
+    1. Zero or near-zero variance (e.g. std < 0.01 or var < 1e-4), which renders CRITIC/TOPSIS mathematically inert.
+    2. Narrow value range relative to theoretical 1.0-9.0 scale (e.g. max - min < 0.5).
+    3. Low raw point counts in the raw cache directory if available.
+
+    Args:
+        decision_matrix: DataFrame or path to decision matrix CSV.
+        raw_cache_dir: Optional directory containing raw cached JSON/GeoJSON layers.
+        min_variance_threshold: Minimum allowable variance (default 1e-4).
+        min_range_threshold: Minimum allowable range (max - min, default 0.5).
+        min_poi_count_threshold: Minimum expected raw POI count in cache (default 5).
+        raise_on_degenerate: If True, raises ValueError if any column is DEGENERATE.
+
+    Returns:
+        DataFrame summarizing quality metrics (min, max, mean, std, range, raw_count, status, issues) for all criteria.
+    """
+    if isinstance(decision_matrix, (str, Path)):
+        df = pd.read_csv(decision_matrix)
+    else:
+        df = decision_matrix.copy()
+
+    criteria_cols = [c for c in df.columns if c not in ["site_id", "latitude", "longitude"]]
+
+    layer_cache_map = {
+        "C1_Major_Roads": "major_roads.geojson",
+        "C5_Competitor_EVCS": "competitor_evcs.geojson",
+        "C6_POI_Schools": "schools.json",
+        "C6_POI_Shopping_Malls": "shopping_malls.json",
+        "C6_POI_Restaurants": "restaurants.json",
+        "C6_POI_Hospitals": "hospitals.json",
+        "C6_POI_Theatres": "theatres.json",
+        "C6_POI_Bus_Stops": "bus_stops.json",
+        "C6_POI_Petrol_Bunks": "petrol_bunks.json",
+    }
+
+    cache_path = Path(raw_cache_dir) if raw_cache_dir else None
+
+    records = []
+    degenerate_cols = []
+    warning_cols = []
+
+    for col in criteria_cols:
+        series = df[col]
+        col_min = float(series.min())
+        col_max = float(series.max())
+        col_mean = float(series.mean())
+        col_std = float(series.std())
+        col_range = col_max - col_min
+
+        # Check raw point count from cache if available
+        raw_count = None
+        if cache_path and cache_path.exists() and col in layer_cache_map:
+            file_path = cache_path / layer_cache_map[col]
+            if file_path.exists():
+                try:
+                    if file_path.suffix == ".geojson":
+                        raw_gdf = gpd.read_file(file_path)
+                        raw_count = len(raw_gdf)
+                    else:
+                        with open(file_path, "r", encoding="utf-8") as f:
+                            raw_data = json.load(f)
+                            raw_count = len(raw_data) if isinstance(raw_data, list) else 0
+                except Exception:
+                    raw_count = None
+
+        issues = []
+        if col_std <= min_variance_threshold or col_range == 0.0:
+            issues.append("ZERO_VARIANCE")
+            degenerate_cols.append(col)
+        elif col_range < min_range_threshold:
+            issues.append("NARROW_RANGE")
+            warning_cols.append(col)
+
+        if raw_count is not None and raw_count < min_poi_count_threshold:
+            issues.append("LOW_RAW_POINTS")
+            if "ZERO_VARIANCE" not in issues and col not in warning_cols:
+                warning_cols.append(col)
+
+        if "ZERO_VARIANCE" in issues:
+            status = "DEGENERATE"
+        elif issues:
+            status = "WARNING"
+        else:
+            status = "HEALTHY"
+
+        records.append({
+            "criterion": col,
+            "raw_count": raw_count,
+            "min": round(col_min, 4),
+            "max": round(col_max, 4),
+            "mean": round(col_mean, 4),
+            "std": round(col_std, 4),
+            "range": round(col_range, 4),
+            "status": status,
+            "issues": ", ".join(issues) if issues else "None",
+        })
+
+    report_df = pd.DataFrame(records)
+
+    if degenerate_cols:
+        msg = (
+            f"[DATA QUALITY ERROR] Degenerate/Zero-variance criteria detected: {degenerate_cols}. "
+            f"These criteria have no spatial contrast and will receive 0.0 weight in CRITIC."
+        )
+        warnings.warn(msg, UserWarning, stacklevel=2)
+        if raise_on_degenerate:
+            raise ValueError(msg)
+    elif warning_cols:
+        msg = f"[DATA QUALITY WARNING] Criteria with narrow range or low POI counts: {warning_cols}."
+        warnings.warn(msg, UserWarning, stacklevel=2)
+
+    return report_df
+
+
+# ---------------------------------------------------------------------------
+# 7. End-to-End Orchestrator
 # ---------------------------------------------------------------------------
 
 def build_decision_matrix(
@@ -691,10 +820,11 @@ def build_decision_matrix(
     """Execute end-to-end GIS pipeline to construct and save the MCDM decision matrix.
 
     Reads configuration, fetches confirmed spatial criteria, calculates KDE and proximity
-    rasters, overlays candidate fishnet points, and exports the final decision matrix CSV.
+    rasters, overlays candidate fishnet points, runs quality validation safeguard,
+    and exports the final decision matrix CSV.
 
     Args:
-        mode: Optional execution mode override ("sample" or "full").
+        mode: Optional execution mode override ("sample", "full", or "full_v2").
         config_path: Path to config/criteria.yaml.
         output_processed_path: Destination path for decision_matrix.csv.
 
@@ -795,7 +925,13 @@ def build_decision_matrix(
     print("[GIS Pipeline] Overlaying candidate grid on raster layers...")
     decision_matrix = overlay_candidates(candidates_gdf, raster_layers)
 
-    # 6. Export Output CSV
+    # 6. Data Quality & Degeneracy Safeguard Validation
+    print("[GIS Pipeline] Running data-quality and degeneracy validation safeguard...")
+    audit_report = validate_decision_matrix_quality(decision_matrix, raw_cache_dir=cache_dir)
+    healthy_count = (audit_report["status"] == "HEALTHY").sum()
+    print(f"[GIS Pipeline] Quality Safeguard Audit: {healthy_count}/{len(audit_report)} criteria HEALTHY.")
+
+    # 7. Export Output CSV
     output_processed_path.parent.mkdir(parents=True, exist_ok=True)
     decision_matrix.to_csv(output_processed_path, index=False)
     print(f"[GIS Pipeline] Decision matrix successfully saved to: {output_processed_path}")
