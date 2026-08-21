@@ -9,10 +9,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_data_quality_audit_table
+from dashboard.utils.data_loader import load_data_quality_audit_table, render_sidebar_logo
 
 
 st.set_page_config(page_title="Data Quality Audit — EV Siting Varanasi", page_icon=":material/verified_user:", layout="wide")
+render_sidebar_logo()
 
 st.title(":material/verified_user: Systematic Data Quality Audit & Permanent Safeguards")
 st.markdown(

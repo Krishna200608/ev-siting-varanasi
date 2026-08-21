@@ -1,8 +1,15 @@
-"""Page 7: Project Methodology Journey & Architectural Decisions."""
-
+import sys
+from pathlib import Path
 import streamlit as st
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from dashboard.utils.data_loader import render_sidebar_logo
+
 st.set_page_config(page_title="Project Journey — EV Siting Varanasi", page_icon=":material/menu_book:", layout="wide")
+render_sidebar_logo()
 
 st.title(":material/menu_book: Project Methodology Journey & Key Decisions")
 st.markdown(

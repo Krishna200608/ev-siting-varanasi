@@ -11,10 +11,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_temporal_curve, get_figure_path
+from dashboard.utils.data_loader import load_temporal_curve, get_figure_path, render_sidebar_logo
 
 
 st.set_page_config(page_title="Demand & SHAP — EV Siting Varanasi", page_icon=":material/show_chart:", layout="wide")
+render_sidebar_logo()
 
 st.title(":material/show_chart: Operational Demand Profiling & SHAP Explainability")
 st.markdown(

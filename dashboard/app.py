@@ -20,11 +20,12 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_mcdm_rankings, load_decision_matrix
+from dashboard.utils.data_loader import load_mcdm_rankings, load_decision_matrix, render_sidebar_logo
 
 
 def main() -> None:
     """Render the Main Overview & Navigation Page."""
+    render_sidebar_logo()
     st.title(":material/electric_bolt: EV Charging Station Siting Decision Support Framework")
     st.caption("A Two-Stage Spatial Multi-Criteria (GIS-MCDM) & Machine Learning Framework — Varanasi, India")
 

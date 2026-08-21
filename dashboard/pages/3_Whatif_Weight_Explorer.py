@@ -9,7 +9,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings
+from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings, render_sidebar_logo
 from dashboard.utils.mcdm_live import (
     get_default_critic_weights,
     compute_live_whatif_ranking,
@@ -18,6 +18,7 @@ from dashboard.utils.mcdm_live import (
 
 
 st.set_page_config(page_title="What-If Explorer — EV Siting Varanasi", page_icon=":material/tune:", layout="wide")
+render_sidebar_logo()
 
 st.title(":material/tune: Live What-If Criteria Weight Explorer")
 st.markdown(

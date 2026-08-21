@@ -10,10 +10,11 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_mcdm_rankings
+from dashboard.utils.data_loader import load_mcdm_rankings, render_sidebar_logo
 
 
 st.set_page_config(page_title="MCDM Rankings — EV Siting Varanasi", page_icon=":material/leaderboard:", layout="wide")
+render_sidebar_logo()
 
 st.title(":material/leaderboard: Multi-Criteria Siting Rankings & Method Comparison")
 st.markdown(
