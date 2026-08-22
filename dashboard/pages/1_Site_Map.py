@@ -13,7 +13,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings, render_sidebar_logo
-from dashboard.utils.theming import inject_theme_and_toggle, get_folium_tiles, get_top10_highlight_colors
+from dashboard.utils.theming import inject_theme_and_toggle, get_folium_tiles
 
 
 st.set_page_config(page_title="Site Map — EV Siting Varanasi", page_icon=":material/map:", layout="wide")
@@ -47,116 +47,126 @@ with col_opt2:
         icon=":material/info:",
     )
 
-# Load data (merge all 308 sites reliably on site_id)
-rankings_df = load_mcdm_rankings(version)
-matrix_df = load_decision_matrix(version)
-merged_df = rankings_df.merge(matrix_df.drop(columns=["latitude", "longitude"], errors="ignore"), on="site_id")
-
-# Color helper
-def get_marker_color(score: float) -> str:
-    if score >= 0.70:
-        return "#1b7837"  # Deep Green
-    elif score >= 0.60:
-        return "#7fbc41"  # Light Green
-    elif score >= 0.50:
-        return "#fee08b"  # Yellow
-    elif score >= 0.40:
-        return "#fdae61"  # Orange
-    else:
-        return "#d73027"  # Red
-
-
-# Initialize Folium Map centered on Central Varanasi
-map_center = [25.3120, 82.9950]
-tiles = get_folium_tiles()
-m = folium.Map(location=map_center, zoom_start=13, tiles=tiles)
-Fullscreen(position="topright").add_to(m)
-
 is_dark = st.session_state.get("theme") == "dark"
 
-# Add municipal bounds approx outline context
-boundary_coords = [
-    [25.265, 82.990], [25.268, 83.008], [25.285, 83.015], [25.305, 83.018],
-    [25.325, 83.032], [25.340, 83.045], [25.362, 83.030], [25.368, 83.000],
-    [25.365, 82.970], [25.345, 82.952], [25.320, 82.948], [25.298, 82.952],
-    [25.282, 82.960], [25.268, 82.975], [25.265, 82.990]
-]
-boundary_color = "#38BDF8" if is_dark else "#0284C7"
-folium.PolyLine(
-    boundary_coords,
-    color=boundary_color,
-    weight=2.5,
-    dash_array="6, 6",
-    opacity=0.85,
-    popup="Approximated VMC Municipal Boundary (~76.99 km²)",
-).add_to(m)
 
-# Plot Candidate Sites
-top5_site_ids = set(rankings_df.sort_values("topsis_critic_rank").head(5)["site_id"])
+@st.cache_resource(show_spinner=False)
+def get_cached_site_map(version_key: str, dark_mode: bool) -> folium.Map:
+    """Build and cache the complete interactive Folium candidate site map."""
+    rankings_data = load_mcdm_rankings(version_key)
+    matrix_data = load_decision_matrix(version_key)
+    merged_data = rankings_data.merge(
+        matrix_data.drop(columns=["latitude", "longitude"], errors="ignore"),
+        on="site_id",
+    )
 
-popup_bg = "#161B22" if is_dark else "#FFFFFF"
-popup_text = "#FAFAFA" if is_dark else "#1E293B"
-popup_accent = "#38BDF8" if is_dark else "#0284C7"
-popup_hr = "#30363D" if is_dark else "#E2E8F0"
+    def get_marker_color(score: float) -> str:
+        if score >= 0.70:
+            return "#1b7837"  # Deep Green
+        elif score >= 0.60:
+            return "#7fbc41"  # Light Green
+        elif score >= 0.50:
+            return "#fee08b"  # Yellow
+        elif score >= 0.40:
+            return "#fdae61"  # Orange
+        else:
+            return "#d73027"  # Red
 
-for _, row in merged_df.iterrows():
-    site_id = row["site_id"]
-    lat, lon = row["latitude"], row["longitude"]
-    rank = int(row["topsis_critic_rank"])
-    score = float(row["topsis_critic_score"])
+    map_center = [25.3120, 82.9950]
+    tiles = "CartoDB dark_matter" if dark_mode else "CartoDB positron"
+    folium_map = folium.Map(location=map_center, zoom_start=13, tiles=tiles)
+    Fullscreen(position="topright").add_to(folium_map)
 
-    # Detailed popup content
-    popup_html = f"""
-    <div style="font-family: Arial, sans-serif; min-width: 200px; font-size: 12px; color: {popup_text}; background-color: {popup_bg}; padding: 2px;">
-        <h4 style="margin:0 0 5px 0; color: {popup_accent};"><b>{site_id}</b> (Rank #{rank})</h4>
-        <b>TOPSIS-CRITIC Score:</b> {score:.4f}<br>
-        <b>Coordinates:</b> {lat:.4f}°N, {lon:.4f}°E<br>
-        <hr style="margin: 5px 0; border: none; border-top: 1px solid {popup_hr};">
-        <b>Criteria Breakdown (1–9 Scale):</b><br>
-        • Major Roads (C1): {row.get('C1_Major_Roads', 0):.2f}<br>
-        • Competitor EVCS (C5): {row.get('C5_Competitor_EVCS', 0):.2f}<br>
-        • Schools (C6): {row.get('C6_POI_Schools', 0):.2f}<br>
-        • Shopping Malls (C6): {row.get('C6_POI_Shopping_Malls', 0):.2f}<br>
-        • Restaurants (C6): {row.get('C6_POI_Restaurants', 0):.2f}<br>
-        • Hospitals (C6): {row.get('C6_POI_Hospitals', 0):.2f}<br>
-        • Theatres (C6): {row.get('C6_POI_Theatres', 0):.2f}<br>
-        • Bus Stops (C6): {row.get('C6_POI_Bus_Stops', 0):.2f}<br>
-        • Petrol Bunks (C6): {row.get('C6_POI_Petrol_Bunks', 0):.2f}
-    </div>
-    """
+    # Municipal bounds approx outline context
+    boundary_coords = [
+        [25.265, 82.990], [25.268, 83.008], [25.285, 83.015], [25.305, 83.018],
+        [25.325, 83.032], [25.340, 83.045], [25.362, 83.030], [25.368, 83.000],
+        [25.365, 82.970], [25.345, 82.952], [25.320, 82.948], [25.298, 82.952],
+        [25.282, 82.960], [25.268, 82.975], [25.265, 82.990]
+    ]
+    boundary_color = "#38BDF8" if dark_mode else "#0284C7"
+    folium.PolyLine(
+        boundary_coords,
+        color=boundary_color,
+        weight=2.5,
+        dash_array="6, 6",
+        opacity=0.85,
+        popup="Approximated VMC Municipal Boundary (~76.99 km²)",
+    ).add_to(folium_map)
 
-    if site_id in top5_site_ids:
-        # Star marker for Top-5
-        folium.Marker(
-            location=[lat, lon],
-            popup=folium.Popup(popup_html, max_width=300),
-            tooltip=f"⭐ Rank #{rank}: {site_id} (Score: {score:.4f})",
-            icon=folium.Icon(color="red", icon="star", prefix="fa"),
-        ).add_to(m)
-    else:
-        # Standard circle marker with theme-contrasting border
-        color = get_marker_color(score)
-        marker_border = "#ffffff" if is_dark else "#334155"
-        folium.CircleMarker(
-            location=[lat, lon],
-            radius=4.5 + (score * 5),
-            color=marker_border,
-            weight=1.2,
-            fill=True,
-            fill_color=color,
-            fill_opacity=0.85,
-            popup=folium.Popup(popup_html, max_width=300),
-            tooltip=f"Rank #{rank}: {site_id} ({score:.4f})",
-        ).add_to(m)
+    top5_ids = set(rankings_data.sort_values("topsis_critic_rank").head(5)["site_id"])
+
+    popup_bg = "#161B22" if dark_mode else "#FFFFFF"
+    popup_text = "#FAFAFA" if dark_mode else "#1E293B"
+    popup_accent = "#38BDF8" if dark_mode else "#0284C7"
+    popup_hr = "#30363D" if dark_mode else "#E2E8F0"
+
+    for _, row in merged_data.iterrows():
+        site_id = row["site_id"]
+        lat, lon = row["latitude"], row["longitude"]
+        rank = int(row["topsis_critic_rank"])
+        score = float(row["topsis_critic_score"])
+
+        popup_html = f"""
+        <div style="font-family: Arial, sans-serif; min-width: 200px; font-size: 12px; color: {popup_text}; background-color: {popup_bg}; padding: 2px;">
+            <h4 style="margin:0 0 5px 0; color: {popup_accent};"><b>{site_id}</b> (Rank #{rank})</h4>
+            <b>TOPSIS-CRITIC Score:</b> {score:.4f}<br>
+            <b>Coordinates:</b> {lat:.4f}°N, {lon:.4f}°E<br>
+            <hr style="margin: 5px 0; border: none; border-top: 1px solid {popup_hr};">
+            <b>Criteria Breakdown (1–9 Scale):</b><br>
+            • Major Roads (C1): {row.get('C1_Major_Roads', 0):.2f}<br>
+            • Competitor EVCS (C5): {row.get('C5_Competitor_EVCS', 0):.2f}<br>
+            • Schools (C6): {row.get('C6_POI_Schools', 0):.2f}<br>
+            • Shopping Malls (C6): {row.get('C6_POI_Shopping_Malls', 0):.2f}<br>
+            • Restaurants (C6): {row.get('C6_POI_Restaurants', 0):.2f}<br>
+            • Hospitals (C6): {row.get('C6_POI_Hospitals', 0):.2f}<br>
+            • Theatres (C6): {row.get('C6_POI_Theatres', 0):.2f}<br>
+            • Bus Stops (C6): {row.get('C6_POI_Bus_Stops', 0):.2f}<br>
+            • Petrol Bunks (C6): {row.get('C6_POI_Petrol_Bunks', 0):.2f}
+        </div>
+        """
+
+        if site_id in top5_ids:
+            folium.Marker(
+                location=[lat, lon],
+                popup=folium.Popup(popup_html, max_width=300),
+                tooltip=f"⭐ Rank #{rank}: {site_id} (Score: {score:.4f})",
+                icon=folium.Icon(color="red", icon="star", prefix="fa"),
+            ).add_to(folium_map)
+        else:
+            color = get_marker_color(score)
+            marker_border = "#ffffff" if dark_mode else "#334155"
+            folium.CircleMarker(
+                location=[lat, lon],
+                radius=4.5 + (score * 5),
+                color=marker_border,
+                weight=1.2,
+                fill=True,
+                fill_color=color,
+                fill_opacity=0.85,
+                popup=folium.Popup(popup_html, max_width=300),
+                tooltip=f"Rank #{rank}: {site_id} ({score:.4f})",
+            ).add_to(folium_map)
+
+    return folium_map
 
 
-# Render Map in Streamlit
+# Retrieve cached Folium Map
+m = get_cached_site_map(version, is_dark)
+
+# Render Map in Streamlit with dynamic key
 st_folium(
     m,
+    key=f"cached_site_map_{version}_{'dark' if is_dark else 'light'}",
     use_container_width=True,
     height=620,
     returned_objects=[],
 )
+
+# Load data for Top-5 Table
+rankings_df = load_mcdm_rankings(version)
+matrix_df = load_decision_matrix(version)
+merged_df = rankings_df.merge(matrix_df.drop(columns=["latitude", "longitude"], errors="ignore"), on="site_id")
 
 # Top-5 Table Callout
 st.subheader(f":material/trophy: Top-5 Ranked Charging Station Locations ({version_choice.split(':')[0]})")
@@ -177,34 +187,61 @@ top5_display.rename(columns={
     "C6_POI_Hospitals": "Hospitals (C6)",
 }, inplace=True)
 
-top10_style = get_top10_highlight_colors()
 
-def highlight_top5(row: pd.Series) -> list[str]:
-    return [f"background-color: {top10_style['bg']}; color: {top10_style['text']}; font-weight: bold;"] * len(row)
+def render_top5_table(df: pd.DataFrame, dark_mode: bool) -> str:
+    """Generate clean, theme-aware responsive HTML table with light header in Light Mode."""
+    th_bg = "#21262D" if dark_mode else "#F8F9FA"
+    th_color = "#FAFAFA" if dark_mode else "#1E293B"
+    th_border = "#30363D" if dark_mode else "#CBD5E1"
 
-column_config = {
-    "Site ID": st.column_config.TextColumn("Site ID", width="small"),
-    "Latitude (°N)": st.column_config.NumberColumn("Latitude (°N)", format="%.4f", width="small"),
-    "Longitude (°E)": st.column_config.NumberColumn("Longitude (°E)", format="%.4f", width="small"),
-    "TOPSIS Score": st.column_config.NumberColumn("TOPSIS Score", format="%.4f", width="small"),
-    "Rank": st.column_config.NumberColumn("Rank", width="small"),
-    "Major Roads (C1)": st.column_config.NumberColumn("Major Roads (C1)", format="%.2f", width="small"),
-    "Shopping Malls (C6)": st.column_config.NumberColumn("Shopping Malls (C6)", format="%.2f", width="small"),
-    "Restaurants (C6)": st.column_config.NumberColumn("Restaurants (C6)", format="%.2f", width="small"),
-    "Hospitals (C6)": st.column_config.NumberColumn("Hospitals (C6)", format="%.2f", width="small"),
-}
+    td_bg = "#14532D" if dark_mode else "#DCFCE7"
+    td_color = "#ECFDF5" if dark_mode else "#14532D"
+    td_border = "#1E3A2F" if dark_mode else "#BBF7D0"
 
-st.dataframe(
-    top5_display.style.apply(highlight_top5, axis=1).format({
-        "Latitude (°N)": "{:.4f}",
-        "Longitude (°E)": "{:.4f}",
-        "TOPSIS Score": "{:.4f}",
-        "Major Roads (C1)": "{:.2f}",
-        "Shopping Malls (C6)": "{:.2f}",
-        "Restaurants (C6)": "{:.2f}",
-        "Hospitals (C6)": "{:.2f}",
-    }),
-    column_config=column_config,
-    hide_index=True,
-    width="stretch",
-)
+    rows_html = []
+    for _, row in df.iterrows():
+        cells = [
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; font-weight: 700; text-align: left;'>{row['Site ID']}</td>",
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; text-align: right;'>{row['Latitude (°N)']:.4f}</td>",
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; text-align: right;'>{row['Longitude (°E)']:.4f}</td>",
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; font-weight: 700; text-align: right;'>{row['TOPSIS Score']:.4f}</td>",
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; font-weight: 700; text-align: center;'>{int(row['Rank'])}</td>",
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; text-align: right;'>{row['Major Roads (C1)']:.2f}</td>",
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; text-align: right;'>{row['Shopping Malls (C6)']:.2f}</td>",
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; text-align: right;'>{row['Restaurants (C6)']:.2f}</td>",
+            f"<td style='padding: 10px 14px; border: 1px solid {td_border}; text-align: right;'>{row['Hospitals (C6)']:.2f}</td>",
+        ]
+        rows_html.append(f"<tr style='background-color: {td_bg}; color: {td_color}; font-size: 0.92rem;'>{''.join(cells)}</tr>")
+
+    headers = [
+        ("Site ID", "left"),
+        ("Latitude (°N)", "right"),
+        ("Longitude (°E)", "right"),
+        ("TOPSIS Score", "right"),
+        ("Rank", "center"),
+        ("Major Roads (C1)", "right"),
+        ("Shopping Malls (C6)", "right"),
+        ("Restaurants (C6)", "right"),
+        ("Hospitals (C6)", "right"),
+    ]
+
+    th_cells = [
+        f"<th style='padding: 10px 14px; background-color: {th_bg}; color: {th_color}; border: 1px solid {th_border}; font-weight: 600; text-align: {align}; font-size: 0.92rem;'>{title}</th>"
+        for title, align in headers
+    ]
+
+    return f"""
+    <div style='width: 100%; overflow-x: auto; border-radius: 8px; border: 1px solid {th_border}; margin-top: 10px; margin-bottom: 20px;'>
+        <table style='width: 100%; border-collapse: collapse; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;'>
+            <thead>
+                <tr>{''.join(th_cells)}</tr>
+            </thead>
+            <tbody>
+                {''.join(rows_html)}
+            </tbody>
+        </table>
+    </div>
+    """
+
+
+st.markdown(render_top5_table(top5_display, is_dark), unsafe_allow_html=True)
