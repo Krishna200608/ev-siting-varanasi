@@ -72,6 +72,46 @@ button[kind="secondary"] svg,
     font-weight: 500 !important;
 }
 
+/* Primary Buttons */
+button[kind="primary"],
+[data-testid="baseButton-primary"] {
+    background-color: #0284C7 !important;
+    border: 1px solid #0284C7 !important;
+    color: #FFFFFF !important;
+    border-radius: 8px !important;
+}
+button[kind="primary"]:hover,
+[data-testid="baseButton-primary"]:hover {
+    background-color: #0369A1 !important;
+    border-color: #0369A1 !important;
+}
+button[kind="primary"] p,
+button[kind="primary"] span,
+button[kind="primary"] svg,
+[data-testid="baseButton-primary"] p,
+[data-testid="baseButton-primary"] span,
+[data-testid="baseButton-primary"] svg {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+/* Toast Notifications */
+[data-testid="stToast"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1) !important;
+    color: #0F172A !important;
+}
+[data-testid="stToast"] * {
+    color: #0F172A !important;
+}
+[data-testid="stToast"] svg {
+    fill: #0284C7 !important;
+    color: #0284C7 !important;
+}
+
 /* Metric Cards */
 [data-testid="stMetric"] {
     background-color: #F8F9FA !important;
@@ -256,6 +296,44 @@ div[data-testid="stSliderTickBar"] span {
     color: #64748B !important;
 }
 
+/* Form Inputs: Radio, Selectbox, TextInput (Light Mode) */
+[data-testid="stRadio"] label,
+[data-testid="stRadio"] [data-testid="stWidgetLabel"] *,
+[data-testid="stRadio"] div[role="radiogroup"] label *,
+[data-testid="stSelectbox"] label,
+[data-testid="stSelectbox"] [data-testid="stWidgetLabel"] *,
+[data-testid="stTextInput"] label,
+[data-testid="stTextInput"] [data-testid="stWidgetLabel"] * {
+    color: #1E293B !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+}
+div[data-baseweb="select"] > div,
+div[data-testid="stTextInput"] input {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+}
+div[data-baseweb="select"] * {
+    color: #0F172A !important;
+}
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+ul[role="listbox"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+}
+li[role="option"] {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+}
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #F1F5F9 !important;
+    color: #0284C7 !important;
+}
+
 /* Code Blocks & Inline Code */
 pre,
 [data-testid="stCode"],
@@ -364,6 +442,46 @@ button[kind="secondary"] svg,
 [data-testid="stSidebar"] button:hover svg {
     color: #58A6FF !important;
     fill: #58A6FF !important;
+}
+
+/* Primary Buttons */
+button[kind="primary"],
+[data-testid="baseButton-primary"] {
+    background-color: #1F6FEB !important;
+    border: 1px solid #388BFD !important;
+    color: #FFFFFF !important;
+    border-radius: 8px !important;
+}
+button[kind="primary"]:hover,
+[data-testid="baseButton-primary"]:hover {
+    background-color: #388BFD !important;
+    border-color: #58A6FF !important;
+}
+button[kind="primary"] p,
+button[kind="primary"] span,
+button[kind="primary"] svg,
+[data-testid="baseButton-primary"] p,
+[data-testid="baseButton-primary"] span,
+[data-testid="baseButton-primary"] svg {
+    color: #FFFFFF !important;
+    fill: #FFFFFF !important;
+    font-weight: 600 !important;
+}
+
+/* Toast Notifications */
+[data-testid="stToast"] {
+    background-color: #161B22 !important;
+    border: 1px solid #30363D !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+    color: #FAFAFA !important;
+}
+[data-testid="stToast"] * {
+    color: #FAFAFA !important;
+}
+[data-testid="stToast"] svg {
+    fill: #58A6FF !important;
+    color: #58A6FF !important;
 }
 
 /* Metric Cards */
@@ -557,6 +675,46 @@ div[data-testid="stSliderTickBar"] span {
     color: #8B949E !important;
 }
 
+/* Form Inputs: Radio, Selectbox, TextInput (Dark Mode) */
+[data-testid="stRadio"] label,
+[data-testid="stRadio"] [data-testid="stWidgetLabel"] *,
+[data-testid="stRadio"] div[role="radiogroup"] label *,
+[data-testid="stRadio"] div[role="radiogroup"] span,
+[data-testid="stRadio"] div[role="radiogroup"] p,
+[data-testid="stSelectbox"] label,
+[data-testid="stSelectbox"] [data-testid="stWidgetLabel"] *,
+[data-testid="stTextInput"] label,
+[data-testid="stTextInput"] [data-testid="stWidgetLabel"] * {
+    color: #F0F6FC !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+}
+div[data-baseweb="select"] > div,
+div[data-testid="stTextInput"] input {
+    background-color: #161B22 !important;
+    color: #FAFAFA !important;
+    border: 1px solid #30363D !important;
+    border-radius: 8px !important;
+}
+div[data-baseweb="select"] * {
+    color: #FAFAFA !important;
+}
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] > div,
+ul[role="listbox"] {
+    background-color: #161B22 !important;
+    border: 1px solid #30363D !important;
+}
+li[role="option"] {
+    background-color: #161B22 !important;
+    color: #FAFAFA !important;
+}
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #21262D !important;
+    color: #58A6FF !important;
+}
+
 /* Code Blocks & Inline Code */
 pre,
 [data-testid="stCode"],
@@ -720,5 +878,16 @@ def get_status_pill_colors() -> dict[str, str]:
 def get_top10_highlight_colors() -> dict[str, str]:
     """Theme-aware replacement for Pages 1-3's Top-10 row highlight colors."""
     if st.session_state.get("theme") == "dark":
-        return {"bg": "#1b5e20", "text": "#ffffff"}
-    return {"bg": "#a5d6a7", "text": "#1b5e20"}
+        return {
+            "bg": "#1b5e20",
+            "text": "#ffffff",
+            "normal_bg": "#161B22",
+            "normal_text": "#FAFAFA",
+        }
+    return {
+        "bg": "#a5d6a7",
+        "text": "#1b5e20",
+        "normal_bg": "#FFFFFF",
+        "normal_text": "#1E293B",
+    }
+

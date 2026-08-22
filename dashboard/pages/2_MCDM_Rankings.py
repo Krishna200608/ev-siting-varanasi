@@ -99,16 +99,40 @@ rename_dict = {
 
 formatted_table = filtered_df[display_cols].rename(columns=rename_dict).sort_values("TOPSIS-CRITIC Rank")
 
-# Highlight Top-10
+# Highlight Top-10 vs Regular rows
 top10_style = get_top10_highlight_colors()
+is_dark = st.session_state.get("theme") == "dark"
+header_bg = "#21262D" if is_dark else "#F8F9FA"
+header_fg = "#FAFAFA" if is_dark else "#1E293B"
+border_color = "#30363D" if is_dark else "#E2E8F0"
 
 def highlight_top_10(row: pd.Series) -> list[str]:
     if row["TOPSIS-CRITIC Rank"] <= 10:
         return [f"background-color: {top10_style['bg']}; color: {top10_style['text']}; font-weight: bold;"] * len(row)
-    return [""] * len(row)
+    return [f"background-color: {top10_style['normal_bg']}; color: {top10_style['normal_text']};"] * len(row)
 
 st.dataframe(
-    formatted_table.style.apply(highlight_top_10, axis=1).format({
+    formatted_table.style.apply(highlight_top_10, axis=1)
+    .set_table_styles([
+        {
+            "selector": "th",
+            "props": [
+                ("background-color", header_bg),
+                ("color", header_fg),
+                ("font-weight", "600"),
+                ("border", f"1px solid {border_color}"),
+            ],
+        },
+        {
+            "selector": "th.col_heading",
+            "props": [
+                ("background-color", header_bg),
+                ("color", header_fg),
+                ("font-weight", "600"),
+            ],
+        },
+    ])
+    .format({
         "Latitude (°N)": "{:.4f}",
         "Longitude (°E)": "{:.4f}",
         "TOPSIS-CRITIC Score": "{:.4f}",
@@ -144,14 +168,29 @@ corr_matrix = rankings_df[rank_cols].corr(method="spearman")
 corr_matrix.columns = ["TOPSIS-CRITIC", "WASPAS-CRITIC", "TOPSIS-Entropy", "WASPAS-Entropy"]
 corr_matrix.index = ["TOPSIS-CRITIC", "WASPAS-CRITIC", "TOPSIS-Entropy", "WASPAS-Entropy"]
 
+is_dark = st.session_state.get("theme") == "dark"
+corr_colorscale = (
+    [[0.0, "#0D1117"], [0.5, "#1E3A8A"], [1.0, "#38BDF8"]]
+    if is_dark
+    else [[0.0, "#EFF6FF"], [0.5, "#93C5FD"], [1.0, "#0284C7"]]
+)
+
 fig = px.imshow(
     corr_matrix,
     text_auto=".4f",
-    color_continuous_scale="Viridis",
+    color_continuous_scale=corr_colorscale,
     title=f"Spearman Rank Correlation Matrix ({version.upper()})",
     aspect="auto",
+    zmin=0.90,
+    zmax=1.0,
 )
-fig.update_layout(margin=dict(l=40, r=40, t=50, b=40))
+fig.update_layout(
+    margin=dict(l=40, r=40, t=50, b=40),
+    coloraxis_colorbar=dict(
+        title=dict(text="Spearman ρ", font=dict(color="#FAFAFA" if is_dark else "#0F172A")),
+        tickfont=dict(color="#FAFAFA" if is_dark else "#0F172A"),
+    ),
+)
 apply_plotly_theme(fig)
 st.plotly_chart(fig, width="stretch")
 
