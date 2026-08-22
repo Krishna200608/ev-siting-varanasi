@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_sensitivity_results, get_figure_path, render_sidebar_logo
-from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template
+from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template, get_plotly_layout_defaults
 
 
 st.set_page_config(page_title="Sensitivity Analysis — EV Siting Varanasi", page_icon=":material/query_stats:", layout="wide")
@@ -48,29 +48,32 @@ tab_v2, tab_v1, tab_sample = st.tabs([
     "3. Central Sample Mode (31 Sites)",
 ])
 
+RENAME_COLS = {
+    "scenario_id": "Scenario ID",
+    "description": "Description",
+    "perturbed_criterion": "Perturbed Criterion",
+    "spearman_rho": "Spearman ρ",
+    "kendall_tau": "Kendall τ",
+    "top5_overlap_pct": "Top-5 Overlap (%)",
+    "top10_overlap_pct": "Top-10 Overlap (%)",
+    "max_rank_shift": "Max Shift",
+}
+
+FORMAT_DICT = {
+    "Spearman ρ": "{:.4f}",
+    "Kendall τ": "{:.4f}",
+    "Top-5 Overlap (%)": "{:.1f}%",
+    "Top-10 Overlap (%)": "{:.1f}%",
+}
+
 with tab_v2:
     sens_v2 = load_sensitivity_results("full_v2")
     st.markdown("**12-Scenario Perturbation Results (Milestone 7 Equal Scrutiny):**")
     
     col1, col2 = st.columns([1.4, 1.1])
     with col1:
-        st.dataframe(
-            sens_v2.rename(columns={
-                "scenario_id": "Scenario ID",
-                "description": "Description",
-                "spearman_rho": "Spearman ρ",
-                "kendall_tau": "Kendall τ",
-                "top5_overlap_pct": "Top-5 Overlap (%)",
-                "top10_overlap_pct": "Top-10 Overlap (%)",
-                "max_rank_shift": "Max Shift",
-            }).style.format({
-                "Spearman ρ": "{:.4f}",
-                "Kendall τ": "{:.4f}",
-                "Top-5 Overlap (%)": "{:.1f}%",
-                "Top-10 Overlap (%)": "{:.1f}%",
-            }),
-            width="stretch",
-            height=430,
+        st.table(
+            sens_v2.rename(columns=RENAME_COLS).style.format(FORMAT_DICT)
         )
     with col2:
         fig_bar = px.bar(
@@ -87,19 +90,23 @@ with tab_v2:
             yaxis_range=[0.70, 1.05],
             xaxis=dict(type="category", tickmode="linear", dtick=1),
             margin=dict(l=20, r=20, t=40, b=20),
-            template=get_plotly_template(),
+            **get_plotly_layout_defaults(),
         )
         st.plotly_chart(fig_bar, width="stretch")
 
 with tab_v1:
     sens_v1 = load_sensitivity_results("full_v1")
     st.markdown("**12-Scenario Perturbation Results (Milestone 6 Baseline):**")
-    st.dataframe(sens_v1, width="stretch")
+    st.table(
+        sens_v1.rename(columns=RENAME_COLS).style.format(FORMAT_DICT)
+    )
 
 with tab_sample:
     sens_sample = load_sensitivity_results("sample")
     st.markdown("**12-Scenario Perturbation Results (Sample Mode, Central Varanasi):**")
-    st.dataframe(sens_sample, width="stretch")
+    st.table(
+        sens_sample.rename(columns=RENAME_COLS).style.format(FORMAT_DICT)
+    )
 
 st.markdown("---")
 

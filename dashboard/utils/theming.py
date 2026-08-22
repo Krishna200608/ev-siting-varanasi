@@ -140,11 +140,39 @@ button[kind="secondary"] svg,
 /* Callout Alerts */
 [data-testid="stAlert"] {
     border-radius: 8px !important;
+    background-color: #FEF3C7 !important;
+    border: 1px solid #F59E0B !important;
 }
-[data-testid="stAlert"] p,
-[data-testid="stAlert"] li,
-[data-testid="stAlert"] span {
-    font-size: 0.95em !important;
+[data-testid="stAlert"] * {
+    color: #78350F !important;
+}
+[data-testid="stAlert"] strong {
+    color: #451A03 !important;
+    font-weight: 700 !important;
+}
+
+/* Tabs */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    background-color: transparent !important;
+    border-bottom: 2px solid #E2E8F0 !important;
+    gap: 8px !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"] {
+    color: #475569 !important;
+    font-weight: 500 !important;
+    background-color: transparent !important;
+    border-bottom: 2px solid transparent !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"]:hover {
+    color: #0F172A !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
+    color: #0284C7 !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid #0284C7 !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"] * {
+    color: inherit !important;
 }
 
 /* Code Blocks & Inline Code */
@@ -328,11 +356,39 @@ button[kind="secondary"] svg,
 /* Callout Alerts */
 [data-testid="stAlert"] {
     border-radius: 8px !important;
+    background-color: #2D2200 !important;
+    border: 1px solid #78350F !important;
 }
-[data-testid="stAlert"] p,
-[data-testid="stAlert"] li,
-[data-testid="stAlert"] span {
-    font-size: 0.95em !important;
+[data-testid="stAlert"] * {
+    color: #FCD34D !important;
+}
+[data-testid="stAlert"] strong {
+    color: #FDE68A !important;
+    font-weight: 700 !important;
+}
+
+/* Tabs */
+[data-testid="stTabs"] [data-baseweb="tab-list"] {
+    background-color: transparent !important;
+    border-bottom: 2px solid #30363D !important;
+    gap: 8px !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"] {
+    color: #8B949E !important;
+    font-weight: 500 !important;
+    background-color: transparent !important;
+    border-bottom: 2px solid transparent !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"]:hover {
+    color: #FAFAFA !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"] {
+    color: #58A6FF !important;
+    font-weight: 700 !important;
+    border-bottom: 2px solid #58A6FF !important;
+}
+[data-testid="stTabs"] button[data-baseweb="tab"] * {
+    color: inherit !important;
 }
 
 /* Code Blocks & Inline Code */
@@ -401,6 +457,23 @@ def inject_theme_and_toggle() -> None:
 def get_plotly_template() -> str:
     """Return Plotly template string according to current theme."""
     return "plotly_dark" if st.session_state.get("theme") == "dark" else "plotly_white"
+
+
+def get_plotly_layout_defaults() -> dict:
+    """Return standard plotly layout configuration for the active theme."""
+    if st.session_state.get("theme") == "dark":
+        return dict(
+            template="plotly_dark",
+            paper_bgcolor="#0E1117",
+            plot_bgcolor="#161B22",
+            font=dict(color="#FAFAFA"),
+        )
+    return dict(
+        template="plotly_white",
+        paper_bgcolor="#FFFFFF",
+        plot_bgcolor="#FFFFFF",
+        font=dict(color="#1E293B"),
+    )
 
 
 def get_folium_tiles() -> str:
