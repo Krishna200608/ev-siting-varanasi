@@ -36,33 +36,63 @@ dm_v2 = load_decision_matrix("v2")
 base_rankings_v2 = load_mcdm_rankings("v2")
 default_critic = get_default_critic_weights(dm_v2)
 
-# Weight Preset Selector
-st.subheader(":material/flash_on: Quick Weight Presets")
-preset_cols = st.columns(5)
-
-with preset_cols[0]:
-    if st.button("CRITIC Default (Empirical)", icon=":material/analytics:", width="stretch"):
-        st.session_state["weights"] = default_critic.copy()
-
-with preset_cols[1]:
-    if st.button("Equal Weights (1/9)", icon=":material/balance:", width="stretch"):
-        st.session_state["weights"] = {k: 1.0 / 9.0 for k in default_critic.keys()}
-
-with preset_cols[2]:
-    if st.button("Road Arterial Focus (50%)", icon=":material/alt_route:", width="stretch"):
-        st.session_state["weights"] = {k: 0.50 if k == "C1_Major_Roads" else 0.50 / 8.0 for k in default_critic.keys()}
-
-with preset_cols[3]:
-    if st.button("Retail Mall Focus (50%)", icon=":material/shopping_cart:", width="stretch"):
-        st.session_state["weights"] = {k: 0.50 if k == "C6_POI_Shopping_Malls" else 0.50 / 8.0 for k in default_critic.keys()}
-
-with preset_cols[4]:
-    if st.button("Healthcare Focus (50%)", icon=":material/local_hospital:", width="stretch"):
-        st.session_state["weights"] = {k: 0.50 if k == "C6_POI_Hospitals" else 0.50 / 8.0 for k in default_critic.keys()}
+# Presets definitions
+PRESETS = {
+    "critic": {
+        "label": "CRITIC Default (Empirical)",
+        "icon": ":material/analytics:",
+        "weights": default_critic.copy(),
+    },
+    "equal": {
+        "label": "Equal Weights (1/9)",
+        "icon": ":material/balance:",
+        "weights": {k: 1.0 / 9.0 for k in default_critic.keys()},
+    },
+    "roads": {
+        "label": "Road Arterial Focus (50%)",
+        "icon": ":material/alt_route:",
+        "weights": {k: 0.50 if k == "C1_Major_Roads" else 0.50 / 8.0 for k in default_critic.keys()},
+    },
+    "retail": {
+        "label": "Retail Mall Focus (50%)",
+        "icon": ":material/shopping_cart:",
+        "weights": {k: 0.50 if k == "C6_POI_Shopping_Malls" else 0.50 / 8.0 for k in default_critic.keys()},
+    },
+    "health": {
+        "label": "Healthcare Focus (50%)",
+        "icon": ":material/local_hospital:",
+        "weights": {k: 0.50 if k == "C6_POI_Hospitals" else 0.50 / 8.0 for k in default_critic.keys()},
+    },
+}
 
 # Initialize session state if not set
 if "weights" not in st.session_state:
     st.session_state["weights"] = default_critic.copy()
+if "active_preset_name" not in st.session_state:
+    st.session_state["active_preset_name"] = "CRITIC Default (Empirical)"
+
+# Quick Weight Presets UI
+st.subheader(":material/flash_on: Quick Weight Presets")
+preset_cols = st.columns(5)
+
+for col, (preset_id, preset_info) in zip(preset_cols, PRESETS.items()):
+    with col:
+        is_active = st.session_state.get("active_preset_name") == preset_info["label"]
+        btn_type = "primary" if is_active else "secondary"
+        if st.button(
+            preset_info["label"],
+            icon=preset_info["icon"],
+            type=btn_type,
+            width="stretch",
+            key=f"preset_btn_{preset_id}",
+        ):
+            st.session_state["weights"] = preset_info["weights"].copy()
+            for k, v in preset_info["weights"].items():
+                st.session_state[f"slider_{k}"] = float(v)
+            st.session_state["active_preset_name"] = preset_info["label"]
+            st.rerun()
+
+st.caption(f"Currently active profile: **{st.session_state.get('active_preset_name', 'Custom')}**")
 
 st.markdown("---")
 
@@ -76,6 +106,10 @@ st.caption(
 col_s1, col_s2, col_s3 = st.columns(3)
 
 criteria_keys = list(default_critic.keys())
+for k in criteria_keys:
+    if f"slider_{k}" not in st.session_state:
+        st.session_state[f"slider_{k}"] = float(st.session_state["weights"].get(k, default_critic[k]))
+
 slider_weights = {}
 
 with col_s1:
@@ -83,21 +117,21 @@ with col_s1:
     slider_weights["C1_Major_Roads"] = st.slider(
         "Major Roads (C1) [Benefit]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C1_Major_Roads"]),
         step=0.01,
+        key="slider_C1_Major_Roads",
     )
     slider_weights["C5_Competitor_EVCS"] = st.slider(
         "Competitor EVCS (C5) [Cost]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C5_Competitor_EVCS"]),
         step=0.01,
         help="0 registered stations exist in Varanasi; weight scales competition avoidance.",
+        key="slider_C5_Competitor_EVCS",
     )
     slider_weights["C6_POI_Schools"] = st.slider(
         "Schools & Universities (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C6_POI_Schools"]),
         step=0.01,
+        key="slider_C6_POI_Schools",
     )
 
 with col_s2:
@@ -105,20 +139,20 @@ with col_s2:
     slider_weights["C6_POI_Shopping_Malls"] = st.slider(
         "Shopping Malls & Retail (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C6_POI_Shopping_Malls"]),
         step=0.01,
+        key="slider_C6_POI_Shopping_Malls",
     )
     slider_weights["C6_POI_Restaurants"] = st.slider(
         "Restaurants & Dining (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C6_POI_Restaurants"]),
         step=0.01,
+        key="slider_C6_POI_Restaurants",
     )
     slider_weights["C6_POI_Theatres"] = st.slider(
         "Theatres & Cinemas (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C6_POI_Theatres"]),
         step=0.01,
+        key="slider_C6_POI_Theatres",
     )
 
 with col_s3:
@@ -126,21 +160,29 @@ with col_s3:
     slider_weights["C6_POI_Hospitals"] = st.slider(
         "Hospitals & Healthcare (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C6_POI_Hospitals"]),
         step=0.01,
+        key="slider_C6_POI_Hospitals",
     )
     slider_weights["C6_POI_Bus_Stops"] = st.slider(
         "Bus Stops & Transit (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C6_POI_Bus_Stops"]),
         step=0.01,
+        key="slider_C6_POI_Bus_Stops",
     )
     slider_weights["C6_POI_Petrol_Bunks"] = st.slider(
         "Petrol Bunks & Fuel (C6) [Benefit]",
         min_value=0.0, max_value=1.0,
-        value=float(st.session_state["weights"]["C6_POI_Petrol_Bunks"]),
         step=0.01,
+        key="slider_C6_POI_Petrol_Bunks",
     )
+
+# Sync session state weights and detect manual adjustments
+st.session_state["weights"] = slider_weights.copy()
+active_name = st.session_state.get("active_preset_name")
+if active_name in [p["label"] for p in PRESETS.values()]:
+    matched_preset = next(p for p in PRESETS.values() if p["label"] == active_name)
+    if any(abs(slider_weights[k] - matched_preset["weights"][k]) > 1e-4 for k in criteria_keys):
+        st.session_state["active_preset_name"] = "Custom (Manual Adjustment)"
 
 # Compute live ranking
 live_results = compute_live_whatif_ranking(

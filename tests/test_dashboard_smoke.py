@@ -87,3 +87,33 @@ def test_theme_toggle_interaction_and_switch():
     assert at.session_state["theme"] == "light"
     assert at.button(key="theme_toggle_btn").label == "Dark Mode"
 
+
+def test_whatif_presets_interaction_and_highlighting():
+    """Verify clicking presets on Page 3 updates weights, highlights active preset button, and executes cleanly."""
+    import pytest
+    at = AppTest.from_file(str(PAGES_DIR / "3_Whatif_Weight_Explorer.py"), default_timeout=30)
+    at.run()
+
+    assert len(at.exception) == 0
+    assert at.session_state["active_preset_name"] == "CRITIC Default (Empirical)"
+
+    # Click Road Arterial preset button
+    road_btn = at.button(key="preset_btn_roads")
+    assert road_btn is not None
+    road_btn.click().run()
+
+    assert len(at.exception) == 0
+    assert at.session_state["active_preset_name"] == "Road Arterial Focus (50%)"
+    assert pytest.approx(at.session_state["weights"]["C1_Major_Roads"], 1e-4) == 0.50
+    assert pytest.approx(at.session_state["slider_C1_Major_Roads"], 1e-4) == 0.50
+
+    # Click Healthcare preset button
+    health_btn = at.button(key="preset_btn_health")
+    assert health_btn is not None
+    health_btn.click().run()
+
+    assert len(at.exception) == 0
+    assert at.session_state["active_preset_name"] == "Healthcare Focus (50%)"
+    assert pytest.approx(at.session_state["weights"]["C6_POI_Hospitals"], 1e-4) == 0.50
+
+
