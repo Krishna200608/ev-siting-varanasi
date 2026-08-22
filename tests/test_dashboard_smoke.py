@@ -61,3 +61,29 @@ def test_smoke_data_quality_audit_table_rendered():
     assert len(at.exception) == 0
     # Confirm dataframe rendered without Pandas Styler exceptions
     assert len(at.dataframe) >= 1
+
+
+def test_theme_toggle_interaction_and_switch():
+    """Verify clicking the sidebar theme toggle safely mutates state and updates UI without errors."""
+    at = AppTest.from_file(str(DASHBOARD_DIR / "app.py"), default_timeout=30)
+    at.run()
+    
+    assert len(at.exception) == 0
+    assert at.session_state["theme"] == "light"
+    
+    toggle_btn = at.button(key="theme_toggle_btn")
+    assert toggle_btn is not None
+    assert toggle_btn.label == "Dark Mode"
+    
+    # Simulate first click: Light -> Dark
+    toggle_btn.click().run()
+    assert len(at.exception) == 0
+    assert at.session_state["theme"] == "dark"
+    assert at.button(key="theme_toggle_btn").label == "Light Mode"
+    
+    # Simulate second click: Dark -> Light
+    at.button(key="theme_toggle_btn").click().run()
+    assert len(at.exception) == 0
+    assert at.session_state["theme"] == "light"
+    assert at.button(key="theme_toggle_btn").label == "Dark Mode"
+

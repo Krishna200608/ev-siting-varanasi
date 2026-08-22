@@ -1,0 +1,167 @@
+"""Runtime light/dark theme toggle: session_state, CSS injection, and chart/map re-theming helpers for the multipage dashboard."""
+
+import streamlit as st
+
+LIGHT_CSS = """
+<style>
+/* Base App & Header */
+.stApp, [data-testid="stAppViewContainer"] {
+    background-color: #FFFFFF;
+    color: #1A1A1A;
+}
+header[data-testid="stHeader"], [data-testid="stHeader"] {
+    background-color: #FFFFFF !important;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: #F8F9FA !important;
+    border-right: 1px solid #E9ECEF;
+}
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] span,
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] a,
+[data-testid="stSidebar"] p {
+    color: #1E293B !important;
+}
+
+/* Metric Cards */
+[data-testid="stMetric"] {
+    background-color: #F8F9FA !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+    padding: 14px !important;
+}
+[data-testid="stMetricLabel"] p,
+[data-testid="stMetricLabel"] span,
+[data-testid="stMetricLabel"] * {
+    color: #475569 !important;
+    font-weight: 500 !important;
+}
+[data-testid="stMetricValue"] div,
+[data-testid="stMetricValue"] span,
+[data-testid="stMetricValue"] * {
+    color: #0F172A !important;
+    font-weight: 700 !important;
+}
+
+/* Dataframe and Tables */
+[data-testid="stDataFrame"], [data-testid="stTable"] {
+    background-color: #FFFFFF !important;
+}
+
+/* Divider Line */
+hr {
+    border-color: #E2E8F0 !important;
+}
+</style>
+"""
+
+DARK_CSS = """
+<style>
+/* Base App & Header */
+.stApp, [data-testid="stAppViewContainer"] {
+    background-color: #0E1117;
+    color: #FAFAFA;
+}
+header[data-testid="stHeader"], [data-testid="stHeader"] {
+    background-color: #0E1117 !important;
+}
+
+/* Sidebar */
+[data-testid="stSidebar"] {
+    background-color: #161B22 !important;
+    border-right: 1px solid #30363D;
+}
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] span,
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] a,
+[data-testid="stSidebar"] p {
+    color: #E6EDF3 !important;
+}
+
+/* Metric Cards */
+[data-testid="stMetric"] {
+    background-color: #161B22 !important;
+    border: 1px solid #30363D !important;
+    border-radius: 8px !important;
+    padding: 14px !important;
+}
+[data-testid="stMetricLabel"] p,
+[data-testid="stMetricLabel"] span,
+[data-testid="stMetricLabel"] * {
+    color: #8B949E !important;
+    font-weight: 500 !important;
+}
+[data-testid="stMetricValue"] div,
+[data-testid="stMetricValue"] span,
+[data-testid="stMetricValue"] * {
+    color: #58A6FF !important;
+    font-weight: 700 !important;
+}
+
+/* Dataframe and Tables */
+[data-testid="stDataFrame"], [data-testid="stTable"] {
+    background-color: #0E1117 !important;
+}
+
+/* Divider Line */
+hr {
+    border-color: #30363D !important;
+}
+</style>
+"""
+
+
+def inject_theme_and_toggle() -> None:
+    """Inject theme CSS and render the sidebar theme toggle button.
+    
+    Call at the top of every page (app.py + all files in pages/).
+    """
+    if "theme" not in st.session_state:
+        st.session_state.theme = "light"
+
+    st.markdown(
+        DARK_CSS if st.session_state.theme == "dark" else LIGHT_CSS,
+        unsafe_allow_html=True,
+    )
+
+    with st.sidebar:
+        is_light = st.session_state.theme == "light"
+        icon = ":material/dark_mode:" if is_light else ":material/light_mode:"
+        label = "Dark Mode" if is_light else "Light Mode"
+        if st.button(label, icon=icon, key="theme_toggle_btn", width="stretch"):
+            st.session_state.theme = "dark" if is_light else "light"
+            st.rerun()
+
+
+def get_plotly_template() -> str:
+    """Return Plotly template string according to current theme."""
+    return "plotly_dark" if st.session_state.get("theme") == "dark" else "plotly_white"
+
+
+def get_folium_tiles() -> str:
+    """Return Folium basemap tile layer name according to current theme."""
+    return "CartoDB dark_matter" if st.session_state.get("theme") == "dark" else "CartoDB positron"
+
+
+def get_status_pill_colors() -> dict[str, str]:
+    """Theme-aware replacement for Page 6's audit status pill colors."""
+    if st.session_state.get("theme") == "dark":
+        return {
+            "healthy_bg": "#1b5e20",
+            "healthy_text": "#c8e6c9",
+            "degenerate_bg": "#b71c1c",
+            "degenerate_text": "#ffcdd2",
+        }
+    return {
+        "healthy_bg": "#c8e6c9",
+        "healthy_text": "#1b5e20",
+        "degenerate_bg": "#ffcdd2",
+        "degenerate_text": "#b71c1c",
+    }
+
+
+def get_top10_highlight_colors() -> dict[str, str]:
+    """Theme-aware replacement for Pages 1-3's Top-10 row highlight colors."""
+    if st.session_state.get("theme") == "dark":
+        return {"bg": "#1b5e20", "text": "#ffffff"}
+    return {"bg": "#a5d6a7", "text": "#1b5e20"}

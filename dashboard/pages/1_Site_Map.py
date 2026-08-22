@@ -12,9 +12,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings, render_sidebar_logo
+from dashboard.utils.theming import inject_theme_and_toggle, get_folium_tiles
 
 
 st.set_page_config(page_title="Site Map — EV Siting Varanasi", page_icon=":material/map:", layout="wide")
+inject_theme_and_toggle()
 render_sidebar_logo()
 
 st.title(":material/map: Interactive Spatial Candidate Site Map")
@@ -65,8 +67,9 @@ def get_marker_color(score: float) -> str:
 
 # Initialize Folium Map centered on Central Varanasi
 map_center = [25.3120, 82.9950]
-m = folium.Map(location=map_center, zoom_start=13, tiles="CartoDB positron")
+m = folium.Map(location=map_center, zoom_start=13, tiles=get_folium_tiles())
 Fullscreen(position="topright").add_to(m)
+
 
 # Add municipal bounds approx outline context
 boundary_coords = [
@@ -122,19 +125,21 @@ for _, row in merged_df.iterrows():
             icon=folium.Icon(color="red", icon="star", prefix="fa"),
         ).add_to(m)
     else:
-        # Standard circle marker
+        # Standard circle marker with theme-contrasting border
         color = get_marker_color(score)
+        marker_border = "#ffffff" if st.session_state.get("theme") == "dark" else "#252525"
         folium.CircleMarker(
             location=[lat, lon],
             radius=4.5 + (score * 5),
-            color="#252525",
-            weight=1,
+            color=marker_border,
+            weight=1.2,
             fill=True,
             fill_color=color,
             fill_opacity=0.85,
             popup=folium.Popup(popup_html, max_width=300),
             tooltip=f"Rank #{rank}: {site_id} ({score:.4f})",
         ).add_to(m)
+
 
 # Render Map in Streamlit
 st_folium(m, width="100%", height=620, returned_objects=[])

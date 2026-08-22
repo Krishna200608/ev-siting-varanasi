@@ -10,9 +10,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_data_quality_audit_table, render_sidebar_logo
+from dashboard.utils.theming import inject_theme_and_toggle, get_status_pill_colors
 
 
 st.set_page_config(page_title="Data Quality Audit — EV Siting Varanasi", page_icon=":material/verified_user:", layout="wide")
+inject_theme_and_toggle()
 render_sidebar_logo()
 
 st.title(":material/verified_user: Systematic Data Quality Audit & Permanent Safeguards")
@@ -26,13 +28,15 @@ st.markdown("---")
 # Audit Table
 st.subheader(":material/table_chart: 9-Criteria × 2-Version Comprehensive Audit Matrix (308 Candidate Sites)")
 audit_df = load_data_quality_audit_table()
+status_colors = get_status_pill_colors()
 
 def highlight_status(val: str) -> str:
     if val == "HEALTHY":
-        return "background-color: #c8e6c9; color: #1b5e20; font-weight: bold;"
+        return f"background-color: {status_colors['healthy_bg']}; color: {status_colors['healthy_text']}; font-weight: bold;"
     elif val == "DEGENERATE":
-        return "background-color: #ffcdd2; color: #b71c1c; font-weight: bold;"
+        return f"background-color: {status_colors['degenerate_bg']}; color: {status_colors['degenerate_text']}; font-weight: bold;"
     return ""
+
 
 st.dataframe(
     audit_df.style.map(highlight_status, subset=["v1 Status", "v2 Status"]).format({

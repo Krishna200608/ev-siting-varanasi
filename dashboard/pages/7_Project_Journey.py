@@ -7,9 +7,12 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import render_sidebar_logo
+from dashboard.utils.theming import inject_theme_and_toggle
 
 st.set_page_config(page_title="Project Journey — EV Siting Varanasi", page_icon=":material/menu_book:", layout="wide")
+inject_theme_and_toggle()
 render_sidebar_logo()
+
 
 st.title(":material/menu_book: Project Methodology Journey & Key Decisions")
 st.markdown(

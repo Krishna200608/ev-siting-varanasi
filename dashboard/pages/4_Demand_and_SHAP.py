@@ -12,9 +12,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_temporal_curve, get_figure_path, render_sidebar_logo
+from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template
 
 
 st.set_page_config(page_title="Demand & SHAP — EV Siting Varanasi", page_icon=":material/show_chart:", layout="wide")
+inject_theme_and_toggle()
 render_sidebar_logo()
 
 st.title(":material/show_chart: Operational Demand Profiling & SHAP Explainability")
@@ -63,6 +65,7 @@ with col_fig:
         xaxis=dict(tickmode="linear", tick0=0, dtick=2),
         hovermode="x unified",
         margin=dict(l=20, r=20, t=50, b=20),
+        template=get_plotly_template(),
     )
     st.plotly_chart(fig_demand, width="stretch")
 
@@ -116,7 +119,12 @@ with tab_full:
     with col_sh1:
         try:
             img_path = get_figure_path("shap_summary.png")
+            st.markdown(
+                '<div style="background-color:#FFFFFF; padding:12px; border-radius:8px; margin-bottom:12px;">',
+                unsafe_allow_html=True,
+            )
             st.image(Image.open(img_path), caption="SHAP Summary Plot (Full-Feature ACN Model)", width="stretch")
+            st.markdown("</div>", unsafe_allow_html=True)
         except Exception as e:
             st.error(f"Could not load image: {e}")
     with col_sh2:
@@ -140,7 +148,12 @@ with tab_trans:
     with col_tr1:
         try:
             img_path = get_figure_path("shap_summary_transferable.png")
+            st.markdown(
+                '<div style="background-color:#FFFFFF; padding:12px; border-radius:8px; margin-bottom:12px;">',
+                unsafe_allow_html=True,
+            )
             st.image(Image.open(img_path), caption="SHAP Summary Plot (Transferable Temporal Model)", width="stretch")
+            st.markdown("</div>", unsafe_allow_html=True)
         except Exception as e:
             st.error(f"Could not load image: {e}")
     with col_tr2:

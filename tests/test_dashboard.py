@@ -119,3 +119,36 @@ def test_whatif_default_weights_exact_match_stored_baseline():
 
     # Assert all rank shifts are exactly 0
     assert (live_sorted["rank_shift"] == 0).all()
+
+
+def test_theming_helpers_return_correct_theme_variants():
+    """Verify theming utility helpers return appropriate values for light and dark states."""
+    import streamlit as st
+    from dashboard.utils.theming import (
+        get_plotly_template,
+        get_folium_tiles,
+        get_status_pill_colors,
+        get_top10_highlight_colors,
+    )
+
+    # Test Light mode defaults
+    st.session_state["theme"] = "light"
+    assert get_plotly_template() == "plotly_white"
+    assert get_folium_tiles() == "CartoDB positron"
+    light_pills = get_status_pill_colors()
+    assert light_pills["healthy_bg"] == "#c8e6c9"
+    assert light_pills["degenerate_bg"] == "#ffcdd2"
+    light_top10 = get_top10_highlight_colors()
+    assert light_top10["bg"] == "#a5d6a7"
+
+    # Test Dark mode variants
+    st.session_state["theme"] = "dark"
+    assert get_plotly_template() == "plotly_dark"
+    assert get_folium_tiles() == "CartoDB dark_matter"
+    dark_pills = get_status_pill_colors()
+    assert dark_pills["healthy_bg"] == "#1b5e20"
+    assert dark_pills["degenerate_bg"] == "#b71c1c"
+    dark_top10 = get_top10_highlight_colors()
+    assert dark_top10["bg"] == "#1b5e20"
+    assert dark_top10["text"] == "#ffffff"
+

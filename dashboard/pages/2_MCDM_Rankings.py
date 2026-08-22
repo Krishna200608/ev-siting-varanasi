@@ -11,9 +11,11 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_mcdm_rankings, render_sidebar_logo
+from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template, get_top10_highlight_colors
 
 
 st.set_page_config(page_title="MCDM Rankings — EV Siting Varanasi", page_icon=":material/leaderboard:", layout="wide")
+inject_theme_and_toggle()
 render_sidebar_logo()
 
 st.title(":material/leaderboard: Multi-Criteria Siting Rankings & Method Comparison")
@@ -98,9 +100,11 @@ rename_dict = {
 formatted_table = filtered_df[display_cols].rename(columns=rename_dict).sort_values("TOPSIS-CRITIC Rank")
 
 # Highlight Top-10
+top10_style = get_top10_highlight_colors()
+
 def highlight_top_10(row: pd.Series) -> list[str]:
     if row["TOPSIS-CRITIC Rank"] <= 10:
-        return ["background-color: #1b5e20; color: #ffffff; font-weight: bold;"] * len(row)
+        return [f"background-color: {top10_style['bg']}; color: {top10_style['text']}; font-weight: bold;"] * len(row)
     return [""] * len(row)
 
 st.dataframe(
@@ -150,6 +154,8 @@ fig = px.imshow(
 fig.update_layout(
     font=dict(size=13),
     margin=dict(l=40, r=40, t=50, b=40),
+    template=get_plotly_template(),
 )
 st.plotly_chart(fig, width="stretch")
+
 
