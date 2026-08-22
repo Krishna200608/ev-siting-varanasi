@@ -20,8 +20,37 @@ header[data-testid="stHeader"], [data-testid="stHeader"] {
 }
 [data-testid="stSidebar"] [data-testid="stSidebarNav"] span,
 [data-testid="stSidebar"] [data-testid="stSidebarNav"] a,
-[data-testid="stSidebar"] p {
+[data-testid="stSidebar"] > div p {
     color: #1E293B !important;
+}
+
+/* Buttons */
+[data-testid="stSidebar"] button,
+button[kind="secondary"],
+[data-testid="baseButton-secondary"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #D0D7DE !important;
+    color: #1E293B !important;
+    border-radius: 8px !important;
+}
+[data-testid="stSidebar"] button:hover,
+button[kind="secondary"]:hover,
+[data-testid="baseButton-secondary"]:hover {
+    background-color: #F3F4F6 !important;
+    border-color: #94A3B8 !important;
+}
+[data-testid="stSidebar"] button p,
+[data-testid="stSidebar"] button span,
+[data-testid="stSidebar"] button svg,
+button[kind="secondary"] p,
+button[kind="secondary"] span,
+button[kind="secondary"] svg,
+[data-testid="baseButton-secondary"] p,
+[data-testid="baseButton-secondary"] span,
+[data-testid="baseButton-secondary"] svg {
+    color: #1E293B !important;
+    fill: #1E293B !important;
+    font-weight: 500 !important;
 }
 
 /* Metric Cards */
@@ -115,8 +144,43 @@ header[data-testid="stHeader"], [data-testid="stHeader"] {
 }
 [data-testid="stSidebar"] [data-testid="stSidebarNav"] span,
 [data-testid="stSidebar"] [data-testid="stSidebarNav"] a,
-[data-testid="stSidebar"] p {
+[data-testid="stSidebar"] > div p {
     color: #E6EDF3 !important;
+}
+
+/* Buttons */
+[data-testid="stSidebar"] button,
+button[kind="secondary"],
+[data-testid="baseButton-secondary"] {
+    background-color: #21262D !important;
+    border: 1px solid #30363D !important;
+    color: #FAFAFA !important;
+    border-radius: 8px !important;
+}
+[data-testid="stSidebar"] button:hover,
+button[kind="secondary"]:hover,
+[data-testid="baseButton-secondary"]:hover {
+    background-color: #30363D !important;
+    border-color: #8B949E !important;
+}
+[data-testid="stSidebar"] button p,
+[data-testid="stSidebar"] button span,
+[data-testid="stSidebar"] button svg,
+button[kind="secondary"] p,
+button[kind="secondary"] span,
+button[kind="secondary"] svg,
+[data-testid="baseButton-secondary"] p,
+[data-testid="baseButton-secondary"] span,
+[data-testid="baseButton-secondary"] svg {
+    color: #FAFAFA !important;
+    fill: #FAFAFA !important;
+    font-weight: 500 !important;
+}
+[data-testid="stSidebar"] button:hover p,
+[data-testid="stSidebar"] button:hover span,
+[data-testid="stSidebar"] button:hover svg {
+    color: #58A6FF !important;
+    fill: #58A6FF !important;
 }
 
 /* Metric Cards */
