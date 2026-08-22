@@ -74,8 +74,36 @@ button[kind="secondary"] svg,
 }
 
 /* Dataframe and Tables */
-[data-testid="stDataFrame"], [data-testid="stTable"] {
+[data-testid="stDataFrame"] {
     background-color: #FFFFFF !important;
+}
+[data-testid="stTable"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+[data-testid="stTable"] table {
+    background-color: #FFFFFF !important;
+    color: #1E293B !important;
+    border-collapse: collapse !important;
+    width: 100% !important;
+}
+[data-testid="stTable"] th {
+    background-color: #F8F9FA !important;
+    color: #1E293B !important;
+    border: 1px solid #E2E8F0 !important;
+    font-weight: 600 !important;
+    padding: 8px 12px !important;
+}
+[data-testid="stTable"] td {
+    background-color: #FFFFFF;
+    color: #334155;
+    border: 1px solid #E2E8F0 !important;
+    padding: 8px 12px !important;
+}
+[data-testid="stTable"] tr:hover td {
+    background-color: #F8F9FA;
 }
 
 /* Expanders */
@@ -109,7 +137,24 @@ button[kind="secondary"] svg,
     color: #334155 !important;
 }
 
-/* Inline Code */
+/* Code Blocks & Inline Code */
+pre,
+[data-testid="stCode"],
+[data-testid="stCodeBlock"],
+.stCode,
+.stCode pre {
+    background-color: #F8F9FA !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+    color: #0F172A !important;
+}
+pre code,
+[data-testid="stCode"] code,
+.stCode code {
+    background-color: transparent !important;
+    color: #0F172A !important;
+    border: none !important;
+}
 code {
     background-color: #F1F5F9 !important;
     color: #0F172A !important;
@@ -204,8 +249,36 @@ button[kind="secondary"] svg,
 }
 
 /* Dataframe and Tables */
-[data-testid="stDataFrame"], [data-testid="stTable"] {
+[data-testid="stDataFrame"] {
     background-color: #0E1117 !important;
+}
+[data-testid="stTable"] {
+    background-color: #161B22 !important;
+    border: 1px solid #30363D !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+}
+[data-testid="stTable"] table {
+    background-color: #161B22 !important;
+    color: #FAFAFA !important;
+    border-collapse: collapse !important;
+    width: 100% !important;
+}
+[data-testid="stTable"] th {
+    background-color: #21262D !important;
+    color: #FAFAFA !important;
+    border: 1px solid #30363D !important;
+    font-weight: 600 !important;
+    padding: 8px 12px !important;
+}
+[data-testid="stTable"] td {
+    background-color: #161B22;
+    color: #E6EDF3;
+    border: 1px solid #30363D !important;
+    padding: 8px 12px !important;
+}
+[data-testid="stTable"] tr:hover td {
+    background-color: #1C222B;
 }
 
 /* Expanders */
@@ -242,7 +315,30 @@ button[kind="secondary"] svg,
     color: #FFFFFF !important;
 }
 
-/* Inline Code */
+/* Code Blocks & Inline Code */
+pre,
+[data-testid="stCode"],
+[data-testid="stCodeBlock"],
+.stCode,
+.stCode pre {
+    background-color: #161B22 !important;
+    border: 1px solid #30363D !important;
+    border-radius: 8px !important;
+    color: #E6EDF3 !important;
+}
+pre code,
+[data-testid="stCode"] code,
+.stCode code {
+    background-color: transparent !important;
+    color: #E6EDF3 !important;
+    border: none !important;
+}
+[data-testid="stCode"] button,
+.stCode button {
+    background-color: #21262D !important;
+    color: #8B949E !important;
+    border: 1px solid #30363D !important;
+}
 code {
     background-color: #21262D !important;
     color: #79C0FF !important;

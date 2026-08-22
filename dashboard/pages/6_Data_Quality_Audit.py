@@ -32,19 +32,17 @@ status_colors = get_status_pill_colors()
 
 def highlight_status(val: str) -> str:
     if val == "HEALTHY":
-        return f"background-color: {status_colors['healthy_bg']}; color: {status_colors['healthy_text']}; font-weight: bold;"
+        return f"background-color: {status_colors['healthy_bg']} !important; color: {status_colors['healthy_text']} !important; font-weight: bold;"
     elif val == "DEGENERATE":
-        return f"background-color: {status_colors['degenerate_bg']}; color: {status_colors['degenerate_text']}; font-weight: bold;"
+        return f"background-color: {status_colors['degenerate_bg']} !important; color: {status_colors['degenerate_text']} !important; font-weight: bold;"
     return ""
 
 
-st.dataframe(
+st.table(
     audit_df.style.map(highlight_status, subset=["v1 Status", "v2 Status"]).format({
         "v1 Min": "{:.4f}", "v1 Max": "{:.4f}", "v1 Mean": "{:.4f}", "v1 Std Dev": "{:.4f}", "v1 Range (Δ)": "{:.4f}",
         "v2 Min": "{:.4f}", "v2 Max": "{:.4f}", "v2 Mean": "{:.4f}", "v2 Std Dev": "{:.4f}", "v2 Range (Δ)": "{:.4f}",
     }),
-    width="stretch",
-    height=380,
 )
 
 
@@ -57,7 +55,7 @@ col_diag1, col_diag2 = st.columns(2)
 
 with col_diag1:
     st.error(
-        """
+        r"""
         **Case Study 1: `C6_POI_Hospitals` (Temporarily Degenerate in v1, Cured in v2)**
         * **v1 Failure Mode:** Google Places API encountered HTTP 429 daily quota exhaustion during the Milestone 6 fetch, 
           leaving only 20 points in a single remote south-eastern tile. Candidate KDE density collapsed to near-zero ($<10^{-10}$), 
@@ -72,7 +70,7 @@ with col_diag1:
 
 with col_diag2:
     st.warning(
-        """
+        r"""
         **Case Study 2: `C5_Competitor_EVCS` (Legitimately Degenerate in v1 & v2)**
         * **Empirical Reality:** OpenChargeMap API confirmed **0 registered operational public EV fast-charging stations** 
           within Varanasi's municipal corporation extent.

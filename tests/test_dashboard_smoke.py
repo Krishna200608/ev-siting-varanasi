@@ -54,13 +54,13 @@ def test_smoke_home_overview_elements():
 
 
 def test_smoke_data_quality_audit_table_rendered():
-    """Verify Page 6 Data Quality Audit renders the audit dataframe cleanly."""
+    """Verify Page 6 Data Quality Audit renders the audit table cleanly."""
     at = AppTest.from_file(str(PAGES_DIR / "6_Data_Quality_Audit.py"), default_timeout=30)
     at.run()
     
     assert len(at.exception) == 0
-    # Confirm dataframe rendered without Pandas Styler exceptions
-    assert len(at.dataframe) >= 1
+    # Confirm table or dataframe rendered without Pandas Styler exceptions
+    assert len(at.table) >= 1 or len(at.dataframe) >= 1
 
 
 def test_theme_toggle_interaction_and_switch():
