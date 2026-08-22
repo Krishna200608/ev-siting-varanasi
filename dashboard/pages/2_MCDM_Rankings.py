@@ -3,7 +3,6 @@
 import sys
 from pathlib import Path
 import pandas as pd
-import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
 
@@ -28,8 +27,8 @@ st.markdown(
 
 st.markdown("---")
 
-# Controls
-col1, col2, col3 = st.columns([1.5, 1.5, 2])
+# Filter and Version Selection Controls
+col1, col2, col3 = st.columns([1.3, 1.3, 1.4], gap="medium")
 
 with col1:
     version_choice = st.radio(
@@ -39,7 +38,7 @@ with col1:
     )
     version = "v2" if "v2" in version_choice else "v1"
 
-# Load rankings
+# Load rankings dataset
 rankings_df = load_mcdm_rankings(version)
 
 # Assign Urban Zones based on coordinates
@@ -72,9 +71,10 @@ if selected_zone != "All Zones":
 if search_query:
     filtered_df = filtered_df[filtered_df["site_id"].str.contains(search_query)]
 
-st.markdown(f"**Showing {len(filtered_df)} of {len(rankings_df)} candidate alternatives**")
+# Candidate Count Indicator
+st.markdown(f"**Showing {len(filtered_df):,} of {len(rankings_df):,} candidate alternatives**")
 
-# Display Table
+# Display Columns & Renaming
 display_cols = [
     "site_id", "Urban Zone", "latitude", "longitude",
     "topsis_critic_rank", "topsis_critic_score",
@@ -83,7 +83,6 @@ display_cols = [
     "waspas_entropy_rank", "waspas_entropy_score",
 ]
 
-# Rename for clean presentation and add 1-based Serial Number
 rename_dict = {
     "site_id": "Site ID",
     "latitude": "Latitude (°N)",
@@ -114,6 +113,22 @@ def highlight_top_10(row: pd.Series) -> list[str]:
         return [f"background-color: {top10_style['bg']}; color: {top10_style['text']}; font-weight: bold;"] * len(row)
     return [f"background-color: {top10_style['normal_bg']}; color: {top10_style['normal_text']};"] * len(row)
 
+column_config = {
+    "S.No.": st.column_config.NumberColumn("S.No.", width="small"),
+    "Site ID": st.column_config.TextColumn("Site ID", width="small"),
+    "Urban Zone": st.column_config.TextColumn("Urban Zone", width="medium"),
+    "Latitude (°N)": st.column_config.NumberColumn("Latitude (°N)", format="%.4f", width="small"),
+    "Longitude (°E)": st.column_config.NumberColumn("Longitude (°E)", format="%.4f", width="small"),
+    "TOPSIS-CRITIC Rank": st.column_config.NumberColumn("TOPSIS-CRITIC Rank", width="small"),
+    "TOPSIS-CRITIC Score": st.column_config.NumberColumn("TOPSIS-CRITIC Score", format="%.4f", width="small"),
+    "WASPAS-CRITIC Rank": st.column_config.NumberColumn("WASPAS-CRITIC Rank", width="small"),
+    "WASPAS-CRITIC Score": st.column_config.NumberColumn("WASPAS-CRITIC Score", format="%.4f", width="small"),
+    "TOPSIS-Entropy Rank": st.column_config.NumberColumn("TOPSIS-Entropy Rank", width="small"),
+    "TOPSIS-Entropy Score": st.column_config.NumberColumn("TOPSIS-Entropy Score", format="%.4f", width="small"),
+    "WASPAS-Entropy Rank": st.column_config.NumberColumn("WASPAS-Entropy Rank", width="small"),
+    "WASPAS-Entropy Score": st.column_config.NumberColumn("WASPAS-Entropy Score", format="%.4f", width="small"),
+}
+
 st.dataframe(
     formatted_table.style.apply(highlight_top_10, axis=1).format({
         "Latitude (°N)": "{:.4f}",
@@ -123,9 +138,10 @@ st.dataframe(
         "TOPSIS-Entropy Score": "{:.4f}",
         "WASPAS-Entropy Score": "{:.4f}",
     }),
+    column_config=column_config,
     hide_index=True,
     width="stretch",
-    height=450,
+    height=460,
 )
 
 # Download CSV
@@ -140,7 +156,7 @@ st.download_button(
 
 st.markdown("---")
 
-# Inter-Method Rank Correlation
+# Inter-Method Rank Correlation Section
 st.subheader(":material/query_stats: Inter-Method Rank Concordance & Correlation")
 st.markdown(
     "Spearman's rank correlation (ρ) between algorithms confirms exceptional consensus, "
@@ -221,6 +237,7 @@ fig.update_layout(
         text=f"Spearman Rank Correlation Matrix ({version.upper()})",
         font=dict(color="#FAFAFA" if is_dark else "#0F172A", size=15),
     ),
+    height=420,
     margin=dict(l=40, r=40, t=50, b=40),
     xaxis=dict(
         side="bottom",
@@ -233,5 +250,3 @@ fig.update_layout(
 )
 apply_plotly_theme(fig)
 st.plotly_chart(fig, width="stretch")
-
-
