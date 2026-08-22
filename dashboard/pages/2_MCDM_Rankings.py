@@ -4,6 +4,7 @@ import sys
 from pathlib import Path
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -152,26 +153,82 @@ corr_matrix.columns = ["TOPSIS-CRITIC", "WASPAS-CRITIC", "TOPSIS-Entropy", "WASP
 corr_matrix.index = ["TOPSIS-CRITIC", "WASPAS-CRITIC", "TOPSIS-Entropy", "WASPAS-Entropy"]
 
 is_dark = st.session_state.get("theme") == "dark"
-corr_colorscale = (
-    [[0.0, "#0D1117"], [0.5, "#1E3A8A"], [1.0, "#38BDF8"]]
-    if is_dark
-    else [[0.0, "#EFF6FF"], [0.5, "#93C5FD"], [1.0, "#0284C7"]]
+
+# Professional Blue/Cyan Sequential Palette (0.95 -> 1.00 domain)
+corr_colorscale = [
+    [0.00, "#E8F4FA"],  # 0.9500 (very light blue)
+    [0.25, "#90CAF9"],  # 0.9625 (lower-mid light blue)
+    [0.50, "#29A3D1"],  # 0.9750 (mid cyan/blue)
+    [0.75, "#0077B6"],  # 0.9875 (upper-mid royal blue)
+    [1.00, "#005B8E"],  # 1.0000 (deep blue)
+]
+
+fig = go.Figure(
+    data=go.Heatmap(
+        z=corr_matrix.values,
+        x=list(corr_matrix.columns),
+        y=list(corr_matrix.index),
+        colorscale=corr_colorscale,
+        zmin=0.95,
+        zmax=1.00,
+        xgap=2,
+        ygap=2,
+        colorbar=dict(
+            title=dict(
+                text="Spearman ρ",
+                font=dict(color="#FAFAFA" if is_dark else "#0F172A", size=13),
+            ),
+            tickvals=[0.95, 0.96, 0.97, 0.98, 0.99, 1.00],
+            ticktext=["0.95", "0.96", "0.97", "0.98", "0.99", "1.00"],
+            tickfont=dict(color="#FAFAFA" if is_dark else "#0F172A", size=11),
+            len=0.90,
+            thickness=18,
+        ),
+        hovertemplate=(
+            "<b>Row:</b> %{y}<br>"
+            "<b>Column:</b> %{x}<br>"
+            "<b>Spearman ρ:</b> %{z:.4f}"
+            "<extra></extra>"
+        ),
+    )
 )
 
-fig = px.imshow(
-    corr_matrix,
-    text_auto=".4f",
-    color_continuous_scale=corr_colorscale,
-    title=f"Spearman Rank Correlation Matrix ({version.upper()})",
-    aspect="auto",
-    zmin=0.90,
-    zmax=1.0,
-)
+# Build high-contrast cell text annotations based on cell value luminance
+annotations = []
+for i, row in enumerate(corr_matrix.values):
+    for j, val in enumerate(row):
+        norm_val = (val - 0.95) / (1.00 - 0.95)
+        # Deep blue cells (norm_val >= 0.45, val >= ~0.9725) get white text; light cells get dark navy text
+        text_color = "#FFFFFF" if norm_val >= 0.45 else "#123047"
+        
+        annotations.append(
+            dict(
+                x=corr_matrix.columns[j],
+                y=corr_matrix.index[i],
+                text=f"<b>{val:.4f}</b>",
+                showarrow=False,
+                font=dict(
+                    color=text_color,
+                    size=13,
+                    family="sans-serif",
+                ),
+            )
+        )
+
 fig.update_layout(
+    annotations=annotations,
+    title=dict(
+        text=f"Spearman Rank Correlation Matrix ({version.upper()})",
+        font=dict(color="#FAFAFA" if is_dark else "#0F172A", size=15),
+    ),
     margin=dict(l=40, r=40, t=50, b=40),
-    coloraxis_colorbar=dict(
-        title=dict(text="Spearman ρ", font=dict(color="#FAFAFA" if is_dark else "#0F172A")),
-        tickfont=dict(color="#FAFAFA" if is_dark else "#0F172A"),
+    xaxis=dict(
+        side="bottom",
+        tickfont=dict(color="#FAFAFA" if is_dark else "#0F172A", size=12),
+    ),
+    yaxis=dict(
+        autorange="reversed",
+        tickfont=dict(color="#FAFAFA" if is_dark else "#0F172A", size=12),
     ),
 )
 apply_plotly_theme(fig)
