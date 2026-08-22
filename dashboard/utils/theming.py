@@ -154,6 +154,50 @@ button[kind="primary"] svg,
     align-items: center !important;
 }
 
+/* Selectboxes and Dropdowns (Light Mode) */
+div[data-baseweb="select"],
+div[data-baseweb="select"] > div,
+[data-testid="stSelectbox"] > div > div {
+    background-color: #FFFFFF !important;
+    border-color: #CBD5E1 !important;
+    color: #0F172A !important;
+    border-radius: 8px !important;
+}
+div[data-baseweb="select"] * {
+    color: #0F172A !important;
+}
+div[data-baseweb="select"] svg {
+    fill: #475569 !important;
+}
+div[data-baseweb="popover"],
+ul[role="listbox"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1) !important;
+}
+li[role="option"] {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+}
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #F1F5F9 !important;
+    color: #0284C7 !important;
+}
+
+/* Text Inputs (Light Mode) */
+div[data-baseweb="input"],
+div[data-baseweb="input"] > div,
+[data-testid="stTextInput"] > div > div,
+div[data-baseweb="input"] input,
+[data-testid="stTextInput"] input {
+    background-color: #FFFFFF !important;
+    border-color: #CBD5E1 !important;
+    color: #0F172A !important;
+    border-radius: 8px !important;
+}
+
 /* Dataframe and Tables */
 [data-testid="stDataFrame"] {
     background-color: #FFFFFF !important;
@@ -529,6 +573,50 @@ button[kind="primary"] svg,
     padding: 2px 8px !important;
     display: inline-flex !important;
     align-items: center !important;
+}
+
+/* Selectboxes and Dropdowns (Dark Mode) */
+div[data-baseweb="select"],
+div[data-baseweb="select"] > div,
+[data-testid="stSelectbox"] > div > div {
+    background-color: #21262D !important;
+    border-color: #30363D !important;
+    color: #FAFAFA !important;
+    border-radius: 8px !important;
+}
+div[data-baseweb="select"] * {
+    color: #FAFAFA !important;
+}
+div[data-baseweb="select"] svg {
+    fill: #8B949E !important;
+}
+div[data-baseweb="popover"],
+ul[role="listbox"] {
+    background-color: #161B22 !important;
+    border: 1px solid #30363D !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4) !important;
+}
+li[role="option"] {
+    background-color: #161B22 !important;
+    color: #FAFAFA !important;
+}
+li[role="option"]:hover,
+li[role="option"][aria-selected="true"] {
+    background-color: #30363D !important;
+    color: #58A6FF !important;
+}
+
+/* Text Inputs (Dark Mode) */
+div[data-baseweb="input"],
+div[data-baseweb="input"] > div,
+[data-testid="stTextInput"] > div > div,
+div[data-baseweb="input"] input,
+[data-testid="stTextInput"] input {
+    background-color: #21262D !important;
+    border-color: #30363D !important;
+    color: #FAFAFA !important;
+    border-radius: 8px !important;
 }
 
 /* Dataframe and Tables */

@@ -105,44 +105,84 @@ formatted_table = (
 )
 formatted_table.insert(0, "S.No.", range(1, len(formatted_table) + 1))
 
-# Highlight Top-10 vs Regular rows
-top10_style = get_top10_highlight_colors()
+is_dark = st.session_state.get("theme") == "dark"
 
-def highlight_top_10(row: pd.Series) -> list[str]:
-    if row["TOPSIS-CRITIC Rank"] <= 10:
-        return [f"background-color: {top10_style['bg']}; color: {top10_style['text']}; font-weight: bold;"] * len(row)
-    return [f"background-color: {top10_style['normal_bg']}; color: {top10_style['normal_text']};"] * len(row)
 
-column_config = {
-    "S.No.": st.column_config.NumberColumn("S.No.", width="small"),
-    "Site ID": st.column_config.TextColumn("Site ID", width="small"),
-    "Urban Zone": st.column_config.TextColumn("Urban Zone", width="medium"),
-    "Latitude (°N)": st.column_config.NumberColumn("Latitude (°N)", format="%.4f", width="small"),
-    "Longitude (°E)": st.column_config.NumberColumn("Longitude (°E)", format="%.4f", width="small"),
-    "TOPSIS-CRITIC Rank": st.column_config.NumberColumn("TOPSIS-CRITIC Rank", width="small"),
-    "TOPSIS-CRITIC Score": st.column_config.NumberColumn("TOPSIS-CRITIC Score", format="%.4f", width="small"),
-    "WASPAS-CRITIC Rank": st.column_config.NumberColumn("WASPAS-CRITIC Rank", width="small"),
-    "WASPAS-CRITIC Score": st.column_config.NumberColumn("WASPAS-CRITIC Score", format="%.4f", width="small"),
-    "TOPSIS-Entropy Rank": st.column_config.NumberColumn("TOPSIS-Entropy Rank", width="small"),
-    "TOPSIS-Entropy Score": st.column_config.NumberColumn("TOPSIS-Entropy Score", format="%.4f", width="small"),
-    "WASPAS-Entropy Rank": st.column_config.NumberColumn("WASPAS-Entropy Rank", width="small"),
-    "WASPAS-Entropy Score": st.column_config.NumberColumn("WASPAS-Entropy Score", format="%.4f", width="small"),
-}
+def render_mcdm_rankings_table(df: pd.DataFrame, dark_mode: bool) -> str:
+    """Generate clean, theme-aware responsive HTML table with light header in Light Mode."""
+    th_bg = "#21262D" if dark_mode else "#F8F9FA"
+    th_color = "#FAFAFA" if dark_mode else "#1E293B"
+    th_border = "#30363D" if dark_mode else "#CBD5E1"
 
-st.dataframe(
-    formatted_table.style.apply(highlight_top_10, axis=1).format({
-        "Latitude (°N)": "{:.4f}",
-        "Longitude (°E)": "{:.4f}",
-        "TOPSIS-CRITIC Score": "{:.4f}",
-        "WASPAS-CRITIC Score": "{:.4f}",
-        "TOPSIS-Entropy Score": "{:.4f}",
-        "WASPAS-Entropy Score": "{:.4f}",
-    }),
-    column_config=column_config,
-    hide_index=True,
-    width="stretch",
-    height=460,
-)
+    top10_bg = "#14532D" if dark_mode else "#DCFCE7"
+    top10_color = "#ECFDF5" if dark_mode else "#14532D"
+    top10_border = "#1E3A2F" if dark_mode else "#BBF7D0"
+
+    norm_bg = "#161B22" if dark_mode else "#FFFFFF"
+    norm_color = "#FAFAFA" if dark_mode else "#1E293B"
+    norm_border = "#30363D" if dark_mode else "#E2E8F0"
+
+    rows_html = []
+    for _, row in df.iterrows():
+        is_top10 = row["TOPSIS-CRITIC Rank"] <= 10
+        row_bg = top10_bg if is_top10 else norm_bg
+        row_color = top10_color if is_top10 else norm_color
+        row_border = top10_border if is_top10 else norm_border
+        row_weight = "700" if is_top10 else "400"
+
+        cells = [
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: center; font-weight: {row_weight};'>{int(row['S.No.'])}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: left; font-weight: 700;'>{row['Site ID']}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: left;'>{row['Urban Zone']}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: right;'>{row['Latitude (°N)']:.4f}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: right;'>{row['Longitude (°E)']:.4f}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: center; font-weight: 700;'>{int(row['TOPSIS-CRITIC Rank'])}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: right; font-weight: 700;'>{row['TOPSIS-CRITIC Score']:.4f}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: center;'>{int(row['WASPAS-CRITIC Rank'])}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: right;'>{row['WASPAS-CRITIC Score']:.4f}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: center;'>{int(row['TOPSIS-Entropy Rank'])}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: right;'>{row['TOPSIS-Entropy Score']:.4f}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: center;'>{int(row['WASPAS-Entropy Rank'])}</td>",
+            f"<td style='padding: 8px 12px; border: 1px solid {row_border}; text-align: right;'>{row['WASPAS-Entropy Score']:.4f}</td>",
+        ]
+        rows_html.append(f"<tr style='background-color: {row_bg}; color: {row_color}; font-size: 0.88rem;'>{''.join(cells)}</tr>")
+
+    headers = [
+        ("S.No.", "center"),
+        ("Site ID", "left"),
+        ("Urban Zone", "left"),
+        ("Latitude (°N)", "right"),
+        ("Longitude (°E)", "right"),
+        ("TOPSIS-CRITIC Rank", "center"),
+        ("TOPSIS-CRITIC Score", "right"),
+        ("WASPAS-CRITIC Rank", "center"),
+        ("WASPAS-CRITIC Score", "right"),
+        ("TOPSIS-Entropy Rank", "center"),
+        ("TOPSIS-Entropy Score", "right"),
+        ("WASPAS-Entropy Rank", "center"),
+        ("WASPAS-Entropy Score", "right"),
+    ]
+
+    th_cells = [
+        f"<th style='padding: 10px 12px; background-color: {th_bg}; color: {th_color}; border: 1px solid {th_border}; font-weight: 600; text-align: {align}; font-size: 0.88rem; position: sticky; top: 0; z-index: 10; box-shadow: 0 1px 0 {th_border};'>{title}</th>"
+        for title, align in headers
+    ]
+
+    return f"""
+    <div style='width: 100%; max-height: 480px; overflow-y: auto; overflow-x: auto; border-radius: 8px; border: 1px solid {th_border}; margin-top: 10px; margin-bottom: 20px;'>
+        <table style='width: 100%; border-collapse: collapse; white-space: nowrap; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif;'>
+            <thead>
+                <tr>{''.join(th_cells)}</tr>
+            </thead>
+            <tbody>
+                {''.join(rows_html)}
+            </tbody>
+        </table>
+    </div>
+    """
+
+
+st.markdown(render_mcdm_rankings_table(formatted_table, is_dark), unsafe_allow_html=True)
 
 # Download CSV
 csv_data = formatted_table.to_csv(index=False).encode("utf-8")
