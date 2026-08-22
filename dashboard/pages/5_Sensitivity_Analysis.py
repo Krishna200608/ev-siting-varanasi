@@ -113,12 +113,21 @@ st.markdown("---")
 # Visual Figure
 st.subheader(":material/insights: Multi-Scenario Sensitivity Visualizations")
 try:
-    fig_path = get_figure_path("mcdm_sensitivity_analysis_full_v2.png")
+    is_dark = st.session_state.get("theme") == "dark"
+    fig_name = "mcdm_sensitivity_analysis_full_v2_dark.png" if is_dark else "mcdm_sensitivity_analysis_full_v2.png"
+    fig_path = get_figure_path(fig_name)
+    card_bg = "#161B22" if is_dark else "#FFFFFF"
+    card_border = "#30363D" if is_dark else "#E2E8F0"
+    st.markdown(
+        f'<div style="background-color:{card_bg}; padding:12px; border-radius:8px; border:1px solid {card_border}; margin-bottom:12px;">',
+        unsafe_allow_html=True,
+    )
     st.image(
         Image.open(fig_path),
-        caption="12-Scenario Sensitivity Analysis Curves: Spearman ρ, Kendall τ, and Shortlist Overlap (Citywide Mode)",
+        caption="12-Scenario Sensitivity Analysis Curves: Spearman ρ and Shortlist Overlap (Citywide Equal-Scrutiny Mode)",
         width="stretch",
     )
+    st.markdown("</div>", unsafe_allow_html=True)
 except Exception as e:
     st.warning(f"Sensitivity figure not loaded: {e}")
 

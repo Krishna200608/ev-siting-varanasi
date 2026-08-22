@@ -118,9 +118,13 @@ with tab_full:
     col_sh1, col_sh2 = st.columns([1.5, 1])
     with col_sh1:
         try:
-            img_path = get_figure_path("shap_summary.png")
+            is_dark = st.session_state.get("theme") == "dark"
+            fig_name = "shap_summary_dark.png" if is_dark else "shap_summary.png"
+            img_path = get_figure_path(fig_name)
+            card_bg = "#161B22" if is_dark else "#FFFFFF"
+            card_border = "#30363D" if is_dark else "#E2E8F0"
             st.markdown(
-                '<div style="background-color:#FFFFFF; padding:12px; border-radius:8px; border:1px solid #E2E8F0; margin-bottom:12px;">',
+                f'<div style="background-color:{card_bg}; padding:12px; border-radius:8px; border:1px solid {card_border}; margin-bottom:12px;">',
                 unsafe_allow_html=True,
             )
             st.image(Image.open(img_path), caption="SHAP Summary Plot (Full-Feature ACN Model)", width="stretch")
@@ -147,9 +151,13 @@ with tab_trans:
     col_tr1, col_tr2 = st.columns([1.5, 1])
     with col_tr1:
         try:
-            img_path = get_figure_path("shap_summary_transferable.png")
+            is_dark = st.session_state.get("theme") == "dark"
+            fig_name = "shap_summary_transferable_dark.png" if is_dark else "shap_summary_transferable.png"
+            img_path = get_figure_path(fig_name)
+            card_bg = "#161B22" if is_dark else "#FFFFFF"
+            card_border = "#30363D" if is_dark else "#E2E8F0"
             st.markdown(
-                '<div style="background-color:#FFFFFF; padding:12px; border-radius:8px; border:1px solid #E2E8F0; margin-bottom:12px;">',
+                f'<div style="background-color:{card_bg}; padding:12px; border-radius:8px; border:1px solid {card_border}; margin-bottom:12px;">',
                 unsafe_allow_html=True,
             )
             st.image(Image.open(img_path), caption="SHAP Summary Plot (Transferable Temporal Model)", width="stretch")

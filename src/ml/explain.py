@@ -69,6 +69,7 @@ def generate_shap_summary_plot(
     shap_values: Any,
     X_sample: pd.DataFrame,
     output_figure_path: Path,
+    is_dark: bool = False,
 ) -> None:
     """Generate and save SHAP beeswarm / summary plot illustrating feature impact and directionality.
 
@@ -76,20 +77,42 @@ def generate_shap_summary_plot(
         shap_values: Computed SHAP Explanation object.
         X_sample: Feature matrix corresponding to shap_values.
         output_figure_path: Destination file path for the output figure.
+        is_dark: If True, renders with dark theme styling (#161B22 background).
     """
     output_figure_path = Path(output_figure_path)
     output_figure_path.parent.mkdir(parents=True, exist_ok=True)
 
-    plt.figure(figsize=(9, 6))
+    bg_color = "#161B22" if is_dark else "#FFFFFF"
+    text_color = "#FAFAFA" if is_dark else "#0F172A"
+
+    if is_dark:
+        plt.style.use("dark_background")
+    else:
+        plt.style.use("default")
+
+    fig = plt.figure(figsize=(9, 6), facecolor=bg_color)
+    ax = plt.gca()
+    ax.set_facecolor(bg_color)
+
     if hasattr(shap_values, "values"):
         shap.summary_plot(shap_values.values, X_sample, show=False)
     else:
         shap.summary_plot(shap_values, X_sample, show=False)
 
-    plt.title("SHAP Global Feature Importance (ACN-Data Demand Regressor)", fontsize=12, pad=15)
+    plt.title("SHAP Global Feature Importance (ACN-Data Demand Regressor)", fontsize=12, pad=15, color=text_color)
+    if is_dark:
+        fig.patch.set_facecolor(bg_color)
+        for a in fig.get_axes():
+            a.set_facecolor(bg_color)
+            a.tick_params(colors=text_color)
+            a.xaxis.label.set_color(text_color)
+            a.yaxis.label.set_color(text_color)
+            for spine in a.spines.values():
+                spine.set_color("#30363D")
+
     plt.tight_layout()
-    plt.savefig(output_figure_path, dpi=300, bbox_inches="tight")
-    plt.close()
+    plt.savefig(output_figure_path, dpi=300, bbox_inches="tight", facecolor=bg_color, edgecolor="none")
+    plt.close(fig)
 
 
 def generate_shap_artifacts(
