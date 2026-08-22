@@ -267,19 +267,59 @@ st.markdown("---")
 st.subheader(":material/scatter_plot: Baseline vs. Custom Rank Dispersal")
 st.markdown("Points lying along the diagonal line represent candidate sites whose rank remains unchanged.")
 
+# High-contrast diverging scale:
+# Negative shifts (rank drop): Crimson / Coral Red
+# Zero shift (unchanged rank): Distinct Cyan / Cobalt Blue (clearly visible on both light and dark surfaces)
+# Positive shifts (rank gain): Vibrant Emerald Green
+if is_dark:
+    color_scale = [
+        [0.0, "#EF4444"],    # Drop in rank
+        [0.46, "#F87171"],
+        [0.5, "#38BDF8"],    # Zero shift (Vivid Cyan)
+        [0.54, "#4ADE80"],
+        [1.0, "#22C55E"],    # Gain in rank
+    ]
+else:
+    color_scale = [
+        [0.0, "#DC2626"],    # Drop in rank
+        [0.46, "#EA580C"],
+        [0.5, "#0284C7"],    # Zero shift (Vivid Blue)
+        [0.54, "#16A34A"],
+        [1.0, "#059669"],    # Gain in rank
+    ]
+
+# Center the midpoint at 0 shift
+max_abs_shift = max(int(live_results["rank_shift"].abs().max()), 1)
+color_range = [-max_abs_shift, max_abs_shift]
+
 fig = px.scatter(
     live_results,
     x="baseline_rank",
     y="custom_topsis_rank",
     hover_data=["site_id", "custom_topsis_score", "rank_shift"],
     color="rank_shift",
-    color_continuous_scale="RdYlGn",
-    labels={"baseline_rank": "Baseline TOPSIS-CRITIC Rank", "custom_topsis_rank": "Custom TOPSIS Rank", "rank_shift": "Rank Shift (Δ)"},
+    color_continuous_scale=color_scale,
+    range_color=color_range,
+    labels={
+        "baseline_rank": "Baseline TOPSIS-CRITIC Rank",
+        "custom_topsis_rank": "Custom TOPSIS Rank",
+        "rank_shift": "Rank Shift (Δ)",
+    },
     title="Candidate Site Rank Stability Scatter Plot (308 Sites)",
 )
-fig.add_shape(
-    type="line", line=dict(dash="dash", color="gray"),
-    x0=1, y0=1, x1=308, y1=308
+fig.update_traces(
+    marker=dict(
+        size=8,
+        opacity=0.9,
+        line=dict(width=0.8, color="#0F172A" if not is_dark else "#FAFAFA"),
+    )
 )
+fig.add_shape(
+    type="line",
+    line=dict(dash="dash", color="#94A3B8" if not is_dark else "#64748B", width=1.5),
+    x0=1, y0=1, x1=308, y1=308,
+)
+fig.update_xaxes(zeroline=False, range=[0, 315])
+fig.update_yaxes(zeroline=False, range=[0, 315])
 apply_plotly_theme(fig)
 st.plotly_chart(fig, width="stretch")

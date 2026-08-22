@@ -970,6 +970,10 @@ def apply_plotly_theme(fig) -> None:
                 font=dict(color="#FAFAFA", size=12),
                 title=dict(font=dict(color="#FAFAFA", size=12)),
             ),
+            coloraxis_colorbar=dict(
+                title=dict(font=dict(color="#FAFAFA", size=13)),
+                tickfont=dict(color="#E6EDF3", size=11),
+            ),
         )
         fig.update_xaxes(
             title_font=dict(color="#FAFAFA", size=13),
@@ -993,6 +997,10 @@ def apply_plotly_theme(fig) -> None:
             legend=dict(
                 font=dict(color="#0F172A", size=12),
                 title=dict(font=dict(color="#0F172A", size=12)),
+            ),
+            coloraxis_colorbar=dict(
+                title=dict(font=dict(color="#0F172A", size=13)),
+                tickfont=dict(color="#0F172A", size=11),
             ),
         )
         fig.update_xaxes(
