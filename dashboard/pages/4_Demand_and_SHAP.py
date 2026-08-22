@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_temporal_curve, get_figure_path, render_sidebar_logo
-from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template
+from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template, get_plotly_layout_defaults
 
 
 st.set_page_config(page_title="Demand & SHAP — EV Siting Varanasi", page_icon=":material/show_chart:", layout="wide")
@@ -61,11 +61,11 @@ with col_fig:
         },
     )
     fig_demand.update_layout(
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5),
         xaxis=dict(tickmode="linear", tick0=0, dtick=2),
         hovermode="x unified",
-        margin=dict(l=20, r=20, t=50, b=20),
-        template=get_plotly_template(),
+        margin=dict(l=20, r=20, t=50, b=40),
+        **get_plotly_layout_defaults(),
     )
     st.plotly_chart(fig_demand, width="stretch")
 
@@ -86,7 +86,7 @@ with col_tbl:
             delta="Morning Charge (29.18 kWh)",
             delta_color="off",
         )
-    st.dataframe(curve_df.rename(columns={
+    st.table(curve_df.rename(columns={
         "hour": "Hour",
         "weekday_kwh": "Weekday (kWh)",
         "weekend_kwh": "Weekend (kWh)",
@@ -95,7 +95,7 @@ with col_tbl:
         "Weekday (kWh)": "{:.2f}",
         "Weekend (kWh)": "{:.2f}",
         "Weighted Avg (kWh)": "{:.2f}",
-    }), height=270, width="stretch")
+    }))
 
 st.markdown("---")
 
@@ -120,7 +120,7 @@ with tab_full:
         try:
             img_path = get_figure_path("shap_summary.png")
             st.markdown(
-                '<div style="background-color:#FFFFFF; padding:12px; border-radius:8px; margin-bottom:12px;">',
+                '<div style="background-color:#FFFFFF; padding:12px; border-radius:8px; border:1px solid #E2E8F0; margin-bottom:12px;">',
                 unsafe_allow_html=True,
             )
             st.image(Image.open(img_path), caption="SHAP Summary Plot (Full-Feature ACN Model)", width="stretch")
@@ -132,7 +132,7 @@ with tab_full:
             fi_path = REPO_ROOT / "outputs" / "tables" / "shap_feature_importance.csv"
             fi_df = pd.read_csv(fi_path)
             st.markdown("**Global Mean |SHAP| Values:**")
-            st.dataframe(fi_df.rename(columns={"feature": "Feature", "mean_abs_shap": "Mean |SHAP|"}), width="stretch")
+            st.table(fi_df.rename(columns={"feature": "Feature", "mean_abs_shap": "Mean |SHAP|"}).style.format({"Mean |SHAP|": "{:.4f}"}))
         except Exception as e:
             st.warning(f"Feature importance table not available: {e}")
 
@@ -149,7 +149,7 @@ with tab_trans:
         try:
             img_path = get_figure_path("shap_summary_transferable.png")
             st.markdown(
-                '<div style="background-color:#FFFFFF; padding:12px; border-radius:8px; margin-bottom:12px;">',
+                '<div style="background-color:#FFFFFF; padding:12px; border-radius:8px; border:1px solid #E2E8F0; margin-bottom:12px;">',
                 unsafe_allow_html=True,
             )
             st.image(Image.open(img_path), caption="SHAP Summary Plot (Transferable Temporal Model)", width="stretch")
@@ -161,7 +161,7 @@ with tab_trans:
             fi_path = REPO_ROOT / "outputs" / "tables" / "shap_feature_importance_transferable.csv"
             fi_df = pd.read_csv(fi_path)
             st.markdown("**Global Mean |SHAP| Values:**")
-            st.dataframe(fi_df.rename(columns={"feature": "Feature", "mean_abs_shap": "Mean |SHAP|"}), width="stretch")
+            st.table(fi_df.rename(columns={"feature": "Feature", "mean_abs_shap": "Mean |SHAP|"}).style.format({"Mean |SHAP|": "{:.4f}"}))
         except Exception as e:
             st.warning(f"Feature importance table not available: {e}")
 

@@ -83,13 +83,30 @@ button[kind="secondary"] svg,
 [data-testid="stMetricLabel"] span,
 [data-testid="stMetricLabel"] * {
     color: #475569 !important;
-    font-weight: 500 !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
 }
 [data-testid="stMetricValue"] div,
 [data-testid="stMetricValue"] span,
 [data-testid="stMetricValue"] * {
     color: #0F172A !important;
     font-weight: 700 !important;
+}
+[data-testid="stMetricDelta"],
+[data-testid="stMetricDelta"] div,
+[data-testid="stMetricDelta"] span,
+[data-testid="stMetricDelta"] p,
+[data-testid="stMetricDelta"] svg {
+    color: #334155 !important;
+    fill: #334155 !important;
+    font-weight: 600 !important;
+}
+[data-testid="stMetricDelta"] {
+    background-color: #E2E8F0 !important;
+    border-radius: 6px !important;
+    padding: 2px 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
 }
 
 /* Dataframe and Tables */
@@ -155,15 +172,17 @@ button[kind="secondary"] svg,
 /* Callout Alerts */
 [data-testid="stAlert"] {
     border-radius: 8px !important;
-    background-color: #FEF3C7 !important;
-    border: 1px solid #F59E0B !important;
 }
 [data-testid="stAlert"] * {
-    color: #78350F !important;
+    color: #1E293B !important;
 }
 [data-testid="stAlert"] strong {
-    color: #451A03 !important;
+    color: #0F172A !important;
     font-weight: 700 !important;
+}
+[data-testid="stAlert"] code {
+    color: #0F172A !important;
+    background-color: rgba(0, 0, 0, 0.06) !important;
 }
 
 /* Tabs (st.tabs & React-Aria Tabs in Light Mode) */
@@ -337,13 +356,30 @@ button[kind="secondary"] svg,
 [data-testid="stMetricLabel"] span,
 [data-testid="stMetricLabel"] * {
     color: #8B949E !important;
-    font-weight: 500 !important;
+    font-weight: 600 !important;
+    font-size: 0.95rem !important;
 }
 [data-testid="stMetricValue"] div,
 [data-testid="stMetricValue"] span,
 [data-testid="stMetricValue"] * {
     color: #58A6FF !important;
     font-weight: 700 !important;
+}
+[data-testid="stMetricDelta"],
+[data-testid="stMetricDelta"] div,
+[data-testid="stMetricDelta"] span,
+[data-testid="stMetricDelta"] p,
+[data-testid="stMetricDelta"] svg {
+    color: #E6EDF3 !important;
+    fill: #E6EDF3 !important;
+    font-weight: 600 !important;
+}
+[data-testid="stMetricDelta"] {
+    background-color: #21262D !important;
+    border-radius: 6px !important;
+    padding: 2px 8px !important;
+    display: inline-flex !important;
+    align-items: center !important;
 }
 
 /* Dataframe and Tables */
@@ -416,15 +452,17 @@ button[kind="secondary"] svg,
 /* Callout Alerts */
 [data-testid="stAlert"] {
     border-radius: 8px !important;
-    background-color: #2D2200 !important;
-    border: 1px solid #78350F !important;
 }
 [data-testid="stAlert"] * {
-    color: #FCD34D !important;
+    color: #E6EDF3 !important;
 }
 [data-testid="stAlert"] strong {
-    color: #FDE68A !important;
+    color: #FFFFFF !important;
     font-weight: 700 !important;
+}
+[data-testid="stAlert"] code {
+    color: #79C0FF !important;
+    background-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /* Tabs (st.tabs & React-Aria Tabs in Dark Mode) */
