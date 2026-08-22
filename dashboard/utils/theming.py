@@ -590,14 +590,67 @@ def get_plotly_layout_defaults() -> dict:
             template="plotly_dark",
             paper_bgcolor="#0E1117",
             plot_bgcolor="#161B22",
-            font=dict(color="#FAFAFA"),
+            font=dict(color="#FAFAFA", family="sans-serif"),
         )
     return dict(
         template="plotly_white",
         paper_bgcolor="#FFFFFF",
         plot_bgcolor="#FFFFFF",
-        font=dict(color="#1E293B"),
+        font=dict(color="#0F172A", family="sans-serif"),
     )
+
+
+def apply_plotly_theme(fig) -> None:
+    """Apply comprehensive theme-aware styling to any Plotly figure."""
+    is_dark = st.session_state.get("theme") == "dark"
+    if is_dark:
+        fig.update_layout(
+            template="plotly_dark",
+            paper_bgcolor="#0E1117",
+            plot_bgcolor="#161B22",
+            font=dict(color="#FAFAFA", family="sans-serif"),
+            title_font=dict(color="#FAFAFA", size=15),
+            legend=dict(
+                font=dict(color="#FAFAFA", size=12),
+                title=dict(font=dict(color="#FAFAFA", size=12)),
+            ),
+        )
+        fig.update_xaxes(
+            title_font=dict(color="#FAFAFA", size=13),
+            tickfont=dict(color="#E6EDF3", size=11),
+            gridcolor="#30363D",
+            linecolor="#30363D",
+        )
+        fig.update_yaxes(
+            title_font=dict(color="#FAFAFA", size=13),
+            tickfont=dict(color="#E6EDF3", size=11),
+            gridcolor="#30363D",
+            linecolor="#30363D",
+        )
+    else:
+        fig.update_layout(
+            template="plotly_white",
+            paper_bgcolor="#FFFFFF",
+            plot_bgcolor="#FFFFFF",
+            font=dict(color="#0F172A", family="sans-serif"),
+            title_font=dict(color="#0F172A", size=15),
+            legend=dict(
+                font=dict(color="#0F172A", size=12),
+                title=dict(font=dict(color="#0F172A", size=12)),
+            ),
+        )
+        fig.update_xaxes(
+            title_font=dict(color="#0F172A", size=13),
+            tickfont=dict(color="#334155", size=11),
+            gridcolor="#E2E8F0",
+            linecolor="#CBD5E1",
+        )
+        fig.update_yaxes(
+            title_font=dict(color="#0F172A", size=13),
+            tickfont=dict(color="#334155", size=11),
+            gridcolor="#E2E8F0",
+            linecolor="#CBD5E1",
+        )
 
 
 def get_folium_tiles() -> str:

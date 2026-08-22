@@ -12,7 +12,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_temporal_curve, get_figure_path, render_sidebar_logo
-from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template, get_plotly_layout_defaults
+from dashboard.utils.theming import inject_theme_and_toggle, apply_plotly_theme
 
 
 st.set_page_config(page_title="Demand & SHAP — EV Siting Varanasi", page_icon=":material/show_chart:", layout="wide")
@@ -61,12 +61,12 @@ with col_fig:
         },
     )
     fig_demand.update_layout(
-        legend=dict(orientation="h", yanchor="bottom", y=-0.25, xanchor="center", x=0.5),
         xaxis=dict(tickmode="linear", tick0=0, dtick=2),
+        legend=dict(orientation="h", yanchor="bottom", y=-0.30, xanchor="center", x=0.5),
         hovermode="x unified",
-        margin=dict(l=20, r=20, t=50, b=40),
-        **get_plotly_layout_defaults(),
+        margin=dict(l=20, r=20, t=50, b=50),
     )
+    apply_plotly_theme(fig_demand)
     st.plotly_chart(fig_demand, width="stretch")
 
 with col_tbl:

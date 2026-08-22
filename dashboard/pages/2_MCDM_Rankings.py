@@ -11,7 +11,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_mcdm_rankings, render_sidebar_logo
-from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template, get_top10_highlight_colors
+from dashboard.utils.theming import inject_theme_and_toggle, apply_plotly_theme, get_top10_highlight_colors
 
 
 st.set_page_config(page_title="MCDM Rankings — EV Siting Varanasi", page_icon=":material/leaderboard:", layout="wide")
@@ -151,11 +151,8 @@ fig = px.imshow(
     title=f"Spearman Rank Correlation Matrix ({version.upper()})",
     aspect="auto",
 )
-fig.update_layout(
-    font=dict(size=13),
-    margin=dict(l=40, r=40, t=50, b=40),
-    template=get_plotly_template(),
-)
+fig.update_layout(margin=dict(l=40, r=40, t=50, b=40))
+apply_plotly_theme(fig)
 st.plotly_chart(fig, width="stretch")
 
 

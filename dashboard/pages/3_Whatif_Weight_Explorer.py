@@ -10,7 +10,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from dashboard.utils.data_loader import load_decision_matrix, load_mcdm_rankings, render_sidebar_logo
-from dashboard.utils.theming import inject_theme_and_toggle, get_plotly_template
+from dashboard.utils.theming import inject_theme_and_toggle, apply_plotly_theme, get_top10_highlight_colors
 from dashboard.utils.mcdm_live import (
     get_default_critic_weights,
     compute_live_whatif_ranking,
@@ -230,5 +230,5 @@ fig.add_shape(
     type="line", line=dict(dash="dash", color="gray"),
     x0=1, y0=1, x1=308, y1=308
 )
-fig.update_layout(template=get_plotly_template())
+apply_plotly_theme(fig)
 st.plotly_chart(fig, width="stretch")
