@@ -124,11 +124,14 @@ def test_whatif_default_weights_exact_match_stored_baseline():
 def test_theming_helpers_return_correct_theme_variants():
     """Verify theming utility helpers return appropriate values for light and dark states."""
     import streamlit as st
+    import plotly.express as px
+    import pandas as pd
     from dashboard.utils.theming import (
         get_plotly_template,
         get_folium_tiles,
         get_status_pill_colors,
         get_top10_highlight_colors,
+        apply_plotly_theme,
     )
 
     # Test Light mode defaults
@@ -141,6 +144,12 @@ def test_theming_helpers_return_correct_theme_variants():
     light_top10 = get_top10_highlight_colors()
     assert light_top10["bg"] == "#a5d6a7"
 
+    # Test apply_plotly_theme in Light mode
+    sample_fig = px.line(pd.DataFrame({"x": [1, 2], "y": [3, 4]}), x="x", y="y")
+    apply_plotly_theme(sample_fig)
+    assert sample_fig.layout.paper_bgcolor == "#FFFFFF"
+    assert sample_fig.layout.font.color == "#0F172A"
+
     # Test Dark mode variants
     st.session_state["theme"] = "dark"
     assert get_plotly_template() == "plotly_dark"
@@ -151,4 +160,10 @@ def test_theming_helpers_return_correct_theme_variants():
     dark_top10 = get_top10_highlight_colors()
     assert dark_top10["bg"] == "#1b5e20"
     assert dark_top10["text"] == "#ffffff"
+
+    # Test apply_plotly_theme in Dark mode
+    apply_plotly_theme(sample_fig)
+    assert sample_fig.layout.paper_bgcolor == "#0E1117"
+    assert sample_fig.layout.font.color == "#FAFAFA"
+
 
