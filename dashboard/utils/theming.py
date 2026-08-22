@@ -97,13 +97,13 @@ button[kind="secondary"] svg,
     padding: 8px 12px !important;
 }
 [data-testid="stTable"] td {
-    background-color: #FFFFFF;
-    color: #334155;
+    background-color: #FFFFFF !important;
+    color: #334155 !important;
     border: 1px solid #E2E8F0 !important;
     padding: 8px 12px !important;
 }
 [data-testid="stTable"] tr:hover td {
-    background-color: #F8F9FA;
+    background-color: #F8F9FA !important;
 }
 
 /* Expanders */
@@ -135,6 +135,16 @@ button[kind="secondary"] svg,
 [data-testid="stExpanderDetails"] p,
 [data-testid="stExpanderDetails"] li {
     color: #334155 !important;
+}
+
+/* Callout Alerts */
+[data-testid="stAlert"] {
+    border-radius: 8px !important;
+}
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] li,
+[data-testid="stAlert"] span {
+    font-size: 0.95em !important;
 }
 
 /* Code Blocks & Inline Code */
@@ -272,13 +282,13 @@ button[kind="secondary"] svg,
     padding: 8px 12px !important;
 }
 [data-testid="stTable"] td {
-    background-color: #161B22;
-    color: #E6EDF3;
+    background-color: #161B22 !important;
+    color: #FAFAFA !important;
     border: 1px solid #30363D !important;
     padding: 8px 12px !important;
 }
 [data-testid="stTable"] tr:hover td {
-    background-color: #1C222B;
+    background-color: #1C222B !important;
 }
 
 /* Expanders */
@@ -313,6 +323,16 @@ button[kind="secondary"] svg,
 }
 [data-testid="stExpanderDetails"] strong {
     color: #FFFFFF !important;
+}
+
+/* Callout Alerts */
+[data-testid="stAlert"] {
+    border-radius: 8px !important;
+}
+[data-testid="stAlert"] p,
+[data-testid="stAlert"] li,
+[data-testid="stAlert"] span {
+    font-size: 0.95em !important;
 }
 
 /* Code Blocks & Inline Code */
