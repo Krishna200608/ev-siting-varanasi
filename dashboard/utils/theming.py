@@ -235,6 +235,27 @@ div[data-testid="stTab"] .react-aria-SelectionIndicator {
     border-radius: 2px !important;
 }
 
+/* Sliders (Light Mode) */
+div[data-testid="stSlider"] label,
+div[data-testid="stSlider"] [data-testid="stWidgetLabel"],
+div[data-testid="stSlider"] [data-testid="stWidgetLabel"] p,
+div[data-testid="stSlider"] [data-testid="stWidgetLabel"] span,
+div[data-testid="stSlider"] [data-testid="stWidgetLabel"] * {
+    color: #1E293B !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+}
+div[data-testid="stSliderThumbValue"],
+div[data-testid="stSliderThumbValue"] *,
+div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p,
+div[data-testid="stSlider"] div[data-testid="stThumbValue"] {
+    color: #0F172A !important;
+    font-weight: 700 !important;
+}
+div[data-testid="stSliderTickBar"] span {
+    color: #64748B !important;
+}
+
 /* Code Blocks & Inline Code */
 pre,
 [data-testid="stCode"],
@@ -513,6 +534,27 @@ div[data-testid="stTab"] .react-aria-SelectionIndicator {
     border-color: #58A6FF !important;
     height: 3px !important;
     border-radius: 2px !important;
+}
+
+/* Sliders (Dark Mode) */
+div[data-testid="stSlider"] label,
+div[data-testid="stSlider"] [data-testid="stWidgetLabel"],
+div[data-testid="stSlider"] [data-testid="stWidgetLabel"] p,
+div[data-testid="stSlider"] [data-testid="stWidgetLabel"] span,
+div[data-testid="stSlider"] [data-testid="stWidgetLabel"] * {
+    color: #F0F6FC !important;
+    font-weight: 600 !important;
+    font-size: 0.92rem !important;
+}
+div[data-testid="stSliderThumbValue"],
+div[data-testid="stSliderThumbValue"] *,
+div[data-testid="stSlider"] div[data-testid="stMarkdownContainer"] p,
+div[data-testid="stSlider"] div[data-testid="stThumbValue"] {
+    color: #58A6FF !important;
+    font-weight: 700 !important;
+}
+div[data-testid="stSliderTickBar"] span {
+    color: #8B949E !important;
 }
 
 /* Code Blocks & Inline Code */

@@ -156,6 +156,7 @@ st.subheader(":material/trophy: Live Recomputed Top-10 Candidate Sites")
 
 top1_site = live_results.iloc[0]
 base_top1_site = base_rankings_v2.iloc[0]
+max_shift = int(live_results["rank_shift"].abs().max())
 
 metric_col1, metric_col2, metric_col3 = st.columns(3)
 with metric_col1:
@@ -163,20 +164,24 @@ with metric_col1:
         label="Top Ranked Alternative",
         value=str(top1_site["site_id"]),
         delta=f"Rank #{top1_site['custom_topsis_rank']}",
+        delta_color="off",
     )
 
 with metric_col2:
+    score_delta = top1_site["custom_topsis_score"] - base_top1_site["topsis_critic_score"]
     st.metric(
         label="Top TOPSIS Closeness Score",
         value=f"{top1_site['custom_topsis_score']:.4f}",
-        delta=f"Δ {top1_site['custom_topsis_score'] - base_top1_site['topsis_critic_score']:+.4f} vs Baseline",
+        delta=f"Δ {score_delta:+.4f} vs Baseline",
+        delta_color="off",
     )
 
 with metric_col3:
-    max_shift = int(live_results["rank_shift"].abs().max())
     st.metric(
         label="Max Citywide Rank Shift",
         value=f"{max_shift} Positions",
+        delta="Stability: High" if max_shift <= 5 else ("Stability: Moderate" if max_shift <= 20 else "Stability: Dynamic"),
+        delta_color="off",
         help="Maximum displacement observed across all 308 candidate alternatives under this weight profile.",
     )
 
@@ -195,9 +200,14 @@ top10_table = live_results.head(10)[[
 def format_shift(val: int) -> str:
     return f"+{val}" if val > 0 else str(val)
 
-st.dataframe(
+is_dark = st.session_state.get("theme") == "dark"
+pos_c = "#4ADE80" if is_dark else "#15803D"
+neg_c = "#F87171" if is_dark else "#B91C1C"
+neu_c = "#8B949E" if is_dark else "#64748B"
+
+st.table(
     top10_table.style.map(
-        lambda v: "color: #4caf50; font-weight: bold;" if v > 0 else ("color: #ef5350; font-weight: bold;" if v < 0 else "color: #9e9e9e;"),
+        lambda v: f"color: {pos_c}; font-weight: bold;" if v > 0 else (f"color: {neg_c}; font-weight: bold;" if v < 0 else f"color: {neu_c};"),
         subset=["Rank Shift (Δ)"],
     ).format({
         "New Score": "{:.4f}",
@@ -206,8 +216,7 @@ st.dataframe(
         "C6_POI_Shopping_Malls": "{:.2f}",
         "C6_POI_Restaurants": "{:.2f}",
         "C6_POI_Hospitals": "{:.2f}",
-    }),
-    width="stretch",
+    })
 )
 
 st.markdown("---")
