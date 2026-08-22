@@ -49,6 +49,47 @@ header[data-testid="stHeader"], [data-testid="stHeader"] {
     background-color: #FFFFFF !important;
 }
 
+/* Expanders */
+[data-testid="stExpander"] {
+    background-color: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 8px !important;
+}
+[data-testid="stExpander"] summary {
+    background-color: #F8F9FA !important;
+    color: #1E293B !important;
+    border-radius: 8px !important;
+}
+[data-testid="stExpander"] summary:hover {
+    background-color: #EDF2F7 !important;
+}
+[data-testid="stExpander"] summary p,
+[data-testid="stExpander"] summary span,
+[data-testid="stExpander"] summary svg {
+    color: #1E293B !important;
+    fill: #1E293B !important;
+    font-weight: 600 !important;
+}
+[data-testid="stExpanderDetails"] {
+    background-color: #FFFFFF !important;
+    color: #1E293B !important;
+    border-top: 1px solid #E2E8F0 !important;
+}
+[data-testid="stExpanderDetails"] p,
+[data-testid="stExpanderDetails"] li {
+    color: #334155 !important;
+}
+
+/* Inline Code */
+code {
+    background-color: #F1F5F9 !important;
+    color: #0F172A !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 0.88em !important;
+    border: 1px solid #E2E8F0 !important;
+}
+
 /* Divider Line */
 hr {
     border-color: #E2E8F0 !important;
@@ -101,6 +142,50 @@ header[data-testid="stHeader"], [data-testid="stHeader"] {
 /* Dataframe and Tables */
 [data-testid="stDataFrame"], [data-testid="stTable"] {
     background-color: #0E1117 !important;
+}
+
+/* Expanders */
+[data-testid="stExpander"] {
+    background-color: #161B22 !important;
+    border: 1px solid #30363D !important;
+    border-radius: 8px !important;
+}
+[data-testid="stExpander"] summary {
+    background-color: #161B22 !important;
+    color: #FAFAFA !important;
+    border-radius: 8px !important;
+}
+[data-testid="stExpander"] summary:hover {
+    background-color: #21262D !important;
+}
+[data-testid="stExpander"] summary p,
+[data-testid="stExpander"] summary span,
+[data-testid="stExpander"] summary svg {
+    color: #FAFAFA !important;
+    fill: #FAFAFA !important;
+    font-weight: 600 !important;
+}
+[data-testid="stExpanderDetails"] {
+    background-color: #0E1117 !important;
+    color: #FAFAFA !important;
+    border-top: 1px solid #30363D !important;
+}
+[data-testid="stExpanderDetails"] p,
+[data-testid="stExpanderDetails"] li {
+    color: #E6EDF3 !important;
+}
+[data-testid="stExpanderDetails"] strong {
+    color: #FFFFFF !important;
+}
+
+/* Inline Code */
+code {
+    background-color: #21262D !important;
+    color: #79C0FF !important;
+    padding: 2px 6px !important;
+    border-radius: 4px !important;
+    font-size: 0.88em !important;
+    border: 1px solid #30363D !important;
 }
 
 /* Divider Line */
