@@ -155,6 +155,8 @@ button[kind="primary"] svg,
 }
 
 /* Selectboxes and Dropdowns (Light Mode) */
+[data-testid="stSelectbox"] div[role="group"],
+[data-testid="stSelectbox"] div.react-aria-ComboBox,
 div[data-baseweb="select"],
 div[data-baseweb="select"] > div,
 [data-testid="stSelectbox"] > div > div {
@@ -163,9 +165,12 @@ div[data-baseweb="select"] > div,
     color: #0F172A !important;
     border-radius: 8px !important;
 }
+[data-testid="stSelectbox"] input[role="combobox"],
+[data-testid="stSelectbox"] input,
 div[data-baseweb="select"] * {
     color: #0F172A !important;
     -webkit-text-fill-color: #0F172A !important;
+    font-weight: 500 !important;
 }
 div[data-baseweb="select"] span,
 div[data-baseweb="select"] div,
@@ -173,39 +178,63 @@ div[data-baseweb="select"] input {
     color: #0F172A !important;
     -webkit-text-fill-color: #0F172A !important;
 }
+[data-testid="stSelectbox"] button svg,
+[data-testid="stSelectbox"] svg,
 div[data-baseweb="select"] svg {
     fill: #475569 !important;
     color: #475569 !important;
 }
 
-/* Popover & Options (Light Mode portal attached to body) */
+/* Virtual Dropdown, Popover & Options (Light Mode) */
+[data-testid="stSelectboxVirtualDropdown"],
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] > div,
-div[data-baseweb="menu"],
+div[role="listbox"],
 ul[role="listbox"],
+div[data-baseweb="menu"],
 [data-baseweb="menu"] {
     background-color: #FFFFFF !important;
     border: 1px solid #CBD5E1 !important;
     border-radius: 8px !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
 }
+[data-testid="stSelectboxVirtualDropdown"] [role="option"],
+div[role="option"],
 li[role="option"],
 ul[role="listbox"] li {
     background-color: #FFFFFF !important;
     color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
 }
+[data-testid="stSelectboxVirtualDropdown"] [role="option"] *,
+div[role="option"] *,
 li[role="option"] *,
 ul[role="listbox"] li * {
     color: #0F172A !important;
     -webkit-text-fill-color: #0F172A !important;
 }
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][data-selected="true"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][data-focused="true"],
+div[role="option"]:hover,
+div[role="option"][aria-selected="true"],
+div[role="option"][data-focused="true"],
 li[role="option"]:hover,
 li[role="option"][aria-selected="true"],
 li[role="option"][data-highlighted="true"],
 ul[role="listbox"] li:hover {
     background-color: #E0F2FE !important;
     color: #0284C7 !important;
+    -webkit-text-fill-color: #0284C7 !important;
 }
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][data-selected="true"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][data-focused="true"] *,
+div[role="option"]:hover *,
+div[role="option"][aria-selected="true"] *,
+div[role="option"][data-focused="true"] *,
 li[role="option"]:hover *,
 li[role="option"][aria-selected="true"] *,
 li[role="option"][data-highlighted="true"] *,
@@ -215,16 +244,23 @@ ul[role="listbox"] li:hover * {
 }
 
 /* Text Inputs (Light Mode) */
+[data-testid="stTextInput"] [data-testid="stTextInputRootElement"],
+[data-testid="stTextInput"] div.react-aria-TextField,
 div[data-baseweb="input"],
 div[data-baseweb="input"] > div,
-[data-testid="stTextInput"] > div > div,
-div[data-baseweb="input"] input,
-[data-testid="stTextInput"] input {
+[data-testid="stTextInput"] > div > div {
     background-color: #FFFFFF !important;
     border: 1px solid #CBD5E1 !important;
     color: #0F172A !important;
-    -webkit-text-fill-color: #0F172A !important;
     border-radius: 8px !important;
+}
+[data-testid="stTextInput"] input,
+[data-testid="stTextInputField"],
+div[data-baseweb="input"] input {
+    background-color: transparent !important;
+    color: #0F172A !important;
+    -webkit-text-fill-color: #0F172A !important;
+    font-weight: 500 !important;
 }
 
 /* Dataframe and Tables */
@@ -605,6 +641,8 @@ button[kind="primary"] svg,
 }
 
 /* Selectboxes and Dropdowns (Dark Mode) */
+[data-testid="stSelectbox"] div[role="group"],
+[data-testid="stSelectbox"] div.react-aria-ComboBox,
 div[data-baseweb="select"],
 div[data-baseweb="select"] > div,
 [data-testid="stSelectbox"] > div > div {
@@ -613,9 +651,12 @@ div[data-baseweb="select"] > div,
     color: #FAFAFA !important;
     border-radius: 8px !important;
 }
+[data-testid="stSelectbox"] input[role="combobox"],
+[data-testid="stSelectbox"] input,
 div[data-baseweb="select"] * {
     color: #FAFAFA !important;
     -webkit-text-fill-color: #FAFAFA !important;
+    font-weight: 500 !important;
 }
 div[data-baseweb="select"] span,
 div[data-baseweb="select"] div,
@@ -623,39 +664,63 @@ div[data-baseweb="select"] input {
     color: #FAFAFA !important;
     -webkit-text-fill-color: #FAFAFA !important;
 }
+[data-testid="stSelectbox"] button svg,
+[data-testid="stSelectbox"] svg,
 div[data-baseweb="select"] svg {
     fill: #8B949E !important;
     color: #8B949E !important;
 }
 
-/* Popover & Options (Dark Mode portal attached to body) */
+/* Virtual Dropdown, Popover & Options (Dark Mode) */
+[data-testid="stSelectboxVirtualDropdown"],
 div[data-baseweb="popover"],
 div[data-baseweb="popover"] > div,
-div[data-baseweb="menu"],
+div[role="listbox"],
 ul[role="listbox"],
+div[data-baseweb="menu"],
 [data-baseweb="menu"] {
     background-color: #161B22 !important;
     border: 1px solid #30363D !important;
     border-radius: 8px !important;
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4) !important;
 }
+[data-testid="stSelectboxVirtualDropdown"] [role="option"],
+div[role="option"],
 li[role="option"],
 ul[role="listbox"] li {
     background-color: #161B22 !important;
     color: #FAFAFA !important;
+    -webkit-text-fill-color: #FAFAFA !important;
 }
+[data-testid="stSelectboxVirtualDropdown"] [role="option"] *,
+div[role="option"] *,
 li[role="option"] *,
 ul[role="listbox"] li * {
     color: #FAFAFA !important;
     -webkit-text-fill-color: #FAFAFA !important;
 }
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][data-selected="true"],
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][data-focused="true"],
+div[role="option"]:hover,
+div[role="option"][aria-selected="true"],
+div[role="option"][data-focused="true"],
 li[role="option"]:hover,
 li[role="option"][aria-selected="true"],
 li[role="option"][data-highlighted="true"],
 ul[role="listbox"] li:hover {
     background-color: #30363D !important;
     color: #58A6FF !important;
+    -webkit-text-fill-color: #58A6FF !important;
 }
+[data-testid="stSelectboxVirtualDropdown"] [role="option"]:hover *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][aria-selected="true"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][data-selected="true"] *,
+[data-testid="stSelectboxVirtualDropdown"] [role="option"][data-focused="true"] *,
+div[role="option"]:hover *,
+div[role="option"][aria-selected="true"] *,
+div[role="option"][data-focused="true"] *,
 li[role="option"]:hover *,
 li[role="option"][aria-selected="true"] *,
 li[role="option"][data-highlighted="true"] *,
@@ -665,16 +730,23 @@ ul[role="listbox"] li:hover * {
 }
 
 /* Text Inputs (Dark Mode) */
+[data-testid="stTextInput"] [data-testid="stTextInputRootElement"],
+[data-testid="stTextInput"] div.react-aria-TextField,
 div[data-baseweb="input"],
 div[data-baseweb="input"] > div,
-[data-testid="stTextInput"] > div > div,
-div[data-baseweb="input"] input,
-[data-testid="stTextInput"] input {
+[data-testid="stTextInput"] > div > div {
     background-color: #21262D !important;
     border: 1px solid #30363D !important;
     color: #FAFAFA !important;
-    -webkit-text-fill-color: #FAFAFA !important;
     border-radius: 8px !important;
+}
+[data-testid="stTextInput"] input,
+[data-testid="stTextInputField"],
+div[data-baseweb="input"] input {
+    background-color: transparent !important;
+    color: #FAFAFA !important;
+    -webkit-text-fill-color: #FAFAFA !important;
+    font-weight: 500 !important;
 }
 
 /* Dataframe and Tables */
