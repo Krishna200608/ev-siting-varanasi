@@ -20,7 +20,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from dashboard.utils.data_loader import load_mcdm_rankings, load_decision_matrix, render_sidebar_logo
+from dashboard.utils.data_loader import load_mcdm_rankings, render_sidebar_logo
 from dashboard.utils.theming import inject_theme_and_toggle
 
 
@@ -30,7 +30,12 @@ def main() -> None:
     render_sidebar_logo()
 
     st.title(":material/electric_bolt: EV Charging Station Siting Decision Support Framework")
-    st.caption("A Two-Stage Spatial Multi-Criteria (GIS-MCDM) & Machine Learning Framework — Varanasi, India")
+    st.markdown(
+        "<p style='font-size: 1.05rem; opacity: 0.85; margin-top: -6px; margin-bottom: 20px; line-height: 1.5;'>"
+        "A Two-Stage Spatial Multi-Criteria (GIS-MCDM) & Machine Learning Framework — Varanasi, India"
+        "</p>",
+        unsafe_allow_html=True,
+    )
 
     st.markdown("---")
 
@@ -69,7 +74,7 @@ def main() -> None:
 
     # Headline Stat Callouts
     st.subheader(":material/analytics: Key Urban & Decision Analytics Metrics")
-    col1, col2, col3, col4 = st.columns(4)
+    col1, col2, col3, col4 = st.columns(4, gap="medium")
 
     with col1:
         st.metric(
@@ -111,7 +116,7 @@ def main() -> None:
     st.subheader(":material/explore: Interactive Dashboard Navigation")
     st.markdown("Explore the detailed components of the decision support framework using the sidebar:")
 
-    nav_col1, nav_col2 = st.columns(2)
+    nav_col1, nav_col2 = st.columns(2, gap="large")
 
     with nav_col1:
         st.markdown(
@@ -140,7 +145,10 @@ def main() -> None:
         )
 
     st.markdown("---")
-    st.caption("Developed by **Krishna Sikheriya** | Public Research Repository: [github.com/Krishna200608/ev-siting-varanasi](https://github.com/Krishna200608/ev-siting-varanasi)")
+    st.caption(
+        "Developed by **Krishna Sikheriya** | Public Research Repository: "
+        "[github.com/Krishna200608/ev-siting-varanasi](https://github.com/Krishna200608/ev-siting-varanasi)"
+    )
 
 
 # Configure Multi-Page Navigation with explicit "Home" title
@@ -157,4 +165,3 @@ pages = [
 
 pg = st.navigation(pages)
 pg.run()
-

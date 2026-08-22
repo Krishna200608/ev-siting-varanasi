@@ -117,7 +117,11 @@ button[kind="primary"] svg,
     background-color: #F8F9FA !important;
     border: 1px solid #E2E8F0 !important;
     border-radius: 8px !important;
-    padding: 14px !important;
+    padding: 16px !important;
+    min-height: 125px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
 }
 [data-testid="stMetricLabel"] p,
 [data-testid="stMetricLabel"] span,
@@ -129,7 +133,7 @@ button[kind="primary"] svg,
 [data-testid="stMetricValue"] div,
 [data-testid="stMetricValue"] span,
 [data-testid="stMetricValue"] * {
-    color: #0F172A !important;
+    color: #0284C7 !important;
     font-weight: 700 !important;
 }
 [data-testid="stMetricDelta"],
@@ -139,7 +143,8 @@ button[kind="primary"] svg,
 [data-testid="stMetricDelta"] svg {
     color: #334155 !important;
     fill: #334155 !important;
-    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
 }
 [data-testid="stMetricDelta"] {
     background-color: #E2E8F0 !important;
@@ -489,7 +494,11 @@ button[kind="primary"] svg,
     background-color: #161B22 !important;
     border: 1px solid #30363D !important;
     border-radius: 8px !important;
-    padding: 14px !important;
+    padding: 16px !important;
+    min-height: 125px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
 }
 [data-testid="stMetricLabel"] p,
 [data-testid="stMetricLabel"] span,
@@ -501,7 +510,7 @@ button[kind="primary"] svg,
 [data-testid="stMetricValue"] div,
 [data-testid="stMetricValue"] span,
 [data-testid="stMetricValue"] * {
-    color: #58A6FF !important;
+    color: #38BDF8 !important;
     font-weight: 700 !important;
 }
 [data-testid="stMetricDelta"],
@@ -509,9 +518,10 @@ button[kind="primary"] svg,
 [data-testid="stMetricDelta"] span,
 [data-testid="stMetricDelta"] p,
 [data-testid="stMetricDelta"] svg {
-    color: #E6EDF3 !important;
-    fill: #E6EDF3 !important;
-    font-weight: 600 !important;
+    color: #8B949E !important;
+    fill: #8B949E !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
 }
 [data-testid="stMetricDelta"] {
     background-color: #21262D !important;
